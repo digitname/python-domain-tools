@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.9.0] - 2024-10-31
+
+### Added
+- Implemented automated testing with GitHub Actions
+- Created GitHub Actions workflow for running tests
+- Expanded unit tests in test_app.py
+
+### Changed
+- Updated TODO.md to reflect the implementation of automated testing
+
 ## [1.8.0] - 2024-10-30
 
 ### Added

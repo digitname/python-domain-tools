@@ -27,9 +27,9 @@
 - [x] Implement data visualization for domain statistics
 - [x] Add email notifications for bulk import results
 - [x] Implement multi-factor authentication
+- [x] Implement automated testing with GitHub Actions
 
 # Future Improvements
-- [ ] Implement automated testing with GitHub Actions
 - [ ] Add support for custom domain categorization rules
 - [ ] Implement a caching mechanism to improve performance
 - [ ] Add support for exporting to PDF format
