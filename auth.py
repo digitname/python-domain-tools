@@ -1,6 +1,6 @@
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
-import sqlite3
+from models import User, db
 
 login_manager = LoginManager()
 
@@ -62,26 +62,16 @@ class User(UserMixin):
             return None
 
 def init_auth_db():
-    conn = sqlite3.connect('domains.db')
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS users
-                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
-                  username TEXT UNIQUE NOT NULL,
-                  password TEXT NOT NULL,
-                  is_admin BOOLEAN NOT NULL DEFAULT 0,
-                  two_factor_secret TEXT,
-                  email TEXT UNIQUE)''')
-    conn.commit()
-    conn.close()
+    # This function is no longer needed with SQLAlchemy
+    pass
 
-def add_user(username, password, is_admin=False):
-    conn = sqlite3.connect('domains.db')
-    c = conn.cursor()
-    c.execute("INSERT INTO users (username, password, is_admin) VALUES (?, ?, ?)",
-              (username, generate_password_hash(password), is_admin))
-    conn.commit()
-    conn.close()
+def add_user(username, password, email, is_admin=False):
+    new_user = User(username=username, email=email, is_admin=is_admin)
+    new_user.set_password(password)
+    db.session.add(new_user)
+    db.session.commit()
+    return new_user
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.get(user_id)
+    return User.query.get(int(user_id))

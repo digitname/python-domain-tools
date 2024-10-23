@@ -16,6 +16,10 @@ from auth import User, init_auth_db, add_user, login_manager
 import logging
 from collections import Counter
 from flask_paginate import Pagination
+from datetime import datetime
+import json
+from flask_migrate import Migrate
+
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'  # Change this to a secure random key
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///domains.db'
@@ -25,6 +29,8 @@ db = SQLAlchemy()
 db.init_app(app)
 
 login_manager.init_app(app)
+
+migrate = Migrate(app, db)
 
 # Define the Domain model
 class Domain(db.Model):
@@ -47,7 +53,15 @@ class User(db.Model):
     two_factor_secret = db.Column(db.String(32))
     domains = db.relationship('Domain', backref='user', lazy=True)
 
-    # ... (rest of the User model methods)
+    @staticmethod
+    def get(user_id):
+        return User.query.get(int(user_id))
+
+    @staticmethod
+    def get_by_username(username):
+        return User.query.filter_by(username=username).first()
+
+    # ... (other methods)
 
 # Cache configuration
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
@@ -119,27 +133,34 @@ def search():
 @cache.cached(timeout=300, query_string=True)
 def export():
     format = request.args.get('format', 'csv')
-    domains = Domain.query.all()
+    domains = Domain.query.filter_by(user_id=current_user.id).all()
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     if format == 'csv':
         output = io.StringIO()
         writer = csv.writer(output)
-        writer.writerow(['Domain', 'Category'])
-        writer.writerows([[domain.name, domain.category] for domain in domains])
+        writer.writerow(['Domain', 'Category', 'Hashtags'])
+        writer.writerows([[domain.name, domain.category, domain.hashtags] for domain in domains])
         return send_file(
             io.BytesIO(output.getvalue().encode('utf-8')),
             mimetype='text/csv',
             as_attachment=True,
-            download_name='domains.csv'
+            download_name=f'domains_export_{timestamp}.csv'
         )
     elif format == 'json':
-        return jsonify([{'domain': domain.name, 'category': domain.category} for domain in domains])
+        data = [{'domain': domain.name, 'category': domain.category, 'hashtags': domain.hashtags} for domain in domains]
+        return send_file(
+            io.BytesIO(json.dumps(data, indent=2).encode('utf-8')),
+            mimetype='application/json',
+            as_attachment=True,
+            download_name=f'domains_export_{timestamp}.json'
+        )
     elif format == 'excel':
         wb = openpyxl.Workbook()
         ws = wb.active
-        ws.append(['Domain', 'Category'])
+        ws.append(['Domain', 'Category', 'Hashtags'])
         for domain in domains:
-            ws.append([domain.name, domain.category])
+            ws.append([domain.name, domain.category, domain.hashtags])
         output = io.BytesIO()
         wb.save(output)
         output.seek(0)
@@ -147,7 +168,7 @@ def export():
             output,
             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             as_attachment=True,
-            download_name='domains.xlsx'
+            download_name=f'domains_export_{timestamp}.xlsx'
         )
 
 @app.route('/api/domains', methods=['GET'])
@@ -330,10 +351,10 @@ def list_domains():
     categories = Domain.query.with_entities(Domain.category).distinct().all()
     categories = [category[0] for category in categories]
 
-    return render_template('list_domains.html', 
-                           domains=domains, 
-                           search_query=search_query, 
-                           category_filter=category_filter, 
+    return render_template('list_domains.html',
+                           domains=domains,
+                           search_query=search_query,
+                           category_filter=category_filter,
                            categories=categories,
                            total_domains=total_domains,
                            sort_by=sort_by,
@@ -379,14 +400,14 @@ def remove_ns():
         '%.ovh.net',
         '%.name-services.com',
     ]
-    
+
     removed_count = 0
     for pattern in popular_ns:
         domains_to_remove = Domain.query.filter(Domain.name.ilike(pattern)).all()
         for domain in domains_to_remove:
             db.session.delete(domain)
             removed_count += 1
-    
+
     db.session.commit()
     return jsonify({'message': f'Removed {removed_count} DNS server domains'})
 
@@ -419,13 +440,13 @@ def add_hashtags():
     data = request.json
     domains = data.get('domains', [])
     hashtags = data.get('hashtags', '')
-    
+
     updated_count = Domain.query.filter(Domain.name.in_(domains)).update(
         {Domain.hashtags: Domain.hashtags + ' ' + hashtags if Domain.hashtags else hashtags},
         synchronize_session='fetch'
     )
     db.session.commit()
-    
+
     return jsonify({'message': f'Added hashtags to {updated_count} domains'})
 
 @app.context_processor

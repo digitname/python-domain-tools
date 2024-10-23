@@ -2,6 +2,74 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.12.0] - 2024-10-30
+
+### Added
+- Created separate `models.py` file for database models
+- Implemented Flask-Migrate for database migrations
+
+### Changed
+- Refactored `app.py` and `auth.py` to resolve circular imports
+- Updated database initialization process
+
+### Fixed
+- Resolved circular import issue between `app.py` and `auth.py`
+- Fixed missing `users` table issue by properly initializing the database
+
+## [2.11.0] - 2024-10-29
+
+### Added
+- Integrated Flask-Migrate for database migrations
+- Created initial database migration for User and Domain models
+
+### Changed
+- Updated User model to use SQLAlchemy ORM
+- Modified auth.py to use SQLAlchemy for user operations
+- Updated app initialization to include Flask-Migrate
+
+### Fixed
+- Resolved issue with missing 'users' table by creating proper database schema
+
+## [2.10.0] - 2024-10-28
+
+### Added
+- New `hashtags` field for Domain model
+- Database migration to add `hashtags` column to the domain table
+- Flask-Migrate integration for handling database schema changes
+
+### Changed
+- Updated export functionality to include hashtags in exported data
+- Modified `list_domains.html` to display hashtags for each domain
+
+### Fixed
+- Resolved issue with missing `hashtags` column in domain table
+
+## [2.9.0] - 2024-10-27
+
+### Added
+- Display of total domain count in the navigation menu
+- Context processor to inject total domain count into all templates
+- Sorting functionality for domain list (by domain name and category)
+- Extended DNS server removal to include popular providers like Cloudflare and Sedo
+- Hashtag functionality for domains
+  - New field 'hashtags' added to Domain model
+  - API endpoint for adding hashtags to selected domains
+  - UI elements in list_domains.html for adding hashtags
+- Timestamp added to exported file names
+
+### Changed
+- Updated `list_domains` function to include sorting options
+- Modified `list_domains.html` template to include sorting links and indicators
+- Updated `base.html` template to show domain count in the menu
+- Improved `remove_ns` function to remove a wider range of DNS server domains, including *.NS.CLOUDFLARE.COM
+- Updated JavaScript in `list_domains.html` to reflect changes in DNS server removal and hashtag functionality
+- Improved domain categorization to correctly identify new gTLDs like .startup
+- Modified export functionality to include timestamps in file names and add hashtags to exported data
+
+### Fixed
+- Fixed `remove_selected` function to correctly return the count of removed domains
+- Corrected categorization of domains with new gTLDs (e.g., solo.startup is now recognized as a TLD)
+
 ## [2.8.0] - 2024-10-26
 
 ### Added
@@ -266,6 +334,7 @@ All notable changes to this project will be documented in this file.
   - New field 'hashtags' added to Domain model
   - API endpoint for adding hashtags to selected domains
   - UI elements in list_domains.html for adding hashtags
+- Timestamp added to exported file names
 
 ### Changed
 - Updated `list_domains` function to include sorting options
@@ -274,6 +343,7 @@ All notable changes to this project will be documented in this file.
 - Improved `remove_ns` function to remove a wider range of DNS server domains, including *.NS.CLOUDFLARE.COM
 - Updated JavaScript in `list_domains.html` to reflect changes in DNS server removal and hashtag functionality
 - Improved domain categorization to correctly identify new gTLDs like .startup
+- Modified export functionality to include timestamps in file names and add hashtags to exported data
 
 ### Fixed
 - Fixed `remove_selected` function to correctly return the count of removed domains
