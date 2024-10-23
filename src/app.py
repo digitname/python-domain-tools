@@ -62,5 +62,6 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    port = find_free_port()
+    #port = find_free_port()
+    port = 5001
     app.run(debug=True, port=port)

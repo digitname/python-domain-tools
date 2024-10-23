@@ -5,6 +5,7 @@
 rm -rf venv
 rm app.log
 rm domains.db
+rm src/domains.db
 date +%Y-%m-%d > .date
 
 chmod +x *.sh
@@ -25,12 +26,12 @@ pip uninstall -y -r requirements.txt
 pip install -r requirements.txt
 
 # Run database migration
-python migrate_db.py
+#python src/migrate_db.py
 
 # Initialize the database
 python -c "from app import init_db; init_db()"
 
 echo "Environment setup complete. Activate the virtual environment with 'source venv/bin/activate'"
-python app.py
+python src/app.py
 
 xdg-open http://127.0.0.1:5000/

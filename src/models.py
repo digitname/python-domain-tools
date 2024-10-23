@@ -30,9 +30,25 @@ class User(db.Model, UserMixin):
         db.session.commit()
         return user
 
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, JSON
+from sqlalchemy.orm import relationship
+
 class Domain(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255), nullable=False)
-    category = db.Column(db.String(100), nullable=False)
-    hashtags = db.Column(db.String(255), default='')
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    __tablename__ = 'domains'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255), nullable=False)
+    category = Column(String(100), nullable=False)
+    hashtags = Column(String(255), default='')
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+
+    history = relationship('DomainHistory', backref='domain', lazy='dynamic')
+
+class DomainHistory(db.Model):
+    __tablename__ = 'domain_history'
+
+    id = Column(Integer, primary_key=True)
+    domain_id = Column(Integer, ForeignKey('domains.id'), nullable=False)
+    whois_data = Column(JSON, nullable=False)
+    nameservers = Column(JSON, nullable=False)
+    created_at = Column(DateTime, nullable=False)

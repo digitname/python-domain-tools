@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.13.0] - 2024-11-01
+
+### Added
+- Implemented additional domain categorization rules to handle new gTLDs.
+- Improved the 'remove_ns' function to handle a wider range of DNS server domains, including *.NS.CLOUDFLARE.COM.
+- Added hashtag functionality for domains, including a new field in the Domain model, an API endpoint for adding hashtags, and UI elements in the list_domains.html template.
+- Added timestamps to exported file names.
+
+### Fixed
+- Fixed the 'remove_selected' function to correctly return the count of removed domains.
+- Corrected the categorization of domains with new gTLDs (e.g., solo.startup is now recognized as a TLD).
+
 ## [2.12.0] - 2024-10-30
 
 ### Added

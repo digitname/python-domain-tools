@@ -58,28 +58,6 @@ def register_routes(app, mail, cache, limiter):
 
 
 
-    @app.route('/api/list_domains', methods=['GET'])
-    @login_required
-    def api_list_domains():
-        page = request.args.get('page', 1, type=int)
-        per_page = 20
-        search_query = request.args.get('search', '')
-        category_filter = request.args.get('category', '')
-
-        domains = Domain.query.filter(Domain.name.ilike(f'%{search_query}%'))
-        if category_filter:
-            domains = domains.filter(Domain.category == category_filter)
-
-        total = domains.count()
-        domains = domains.paginate(page, per_page, False)
-
-        pagination = Pagination(page=page, total=total, per_page=per_page, css_framework='bootstrap4')
-
-        return jsonify({
-            'domains': [{'domain': domain.name, 'category': domain.category} for domain in domains],
-            'pagination': pagination.links
-        })
-
 
     @app.route('/api/add_domain', methods=['POST'])
     @login_required
@@ -101,24 +79,43 @@ def register_routes(app, mail, cache, limiter):
     @login_required
     def remove_selected():
         domains = request.json.get('domains', [])
-        removed_count = Domain.query.filter(Domain.name.in_(domains)).delete(synchronize_session='fetch')
-        db.session.commit()
-        return jsonify({'message': f'Removed {removed_count} selected domains'})
+        print(domains)
+        removed_domains = []
+        removed_count = 0
+        for domain in domains:
+            domain_obj = Domain.query.filter_by(name=domain, user_id=current_user.id).first()
+            if domain_obj:
+                removed_domains.append(domain)
+                db.session.delete(domain_obj)
+                db.session.commit()
+                removed_count += 1
+        return jsonify({'message': f'Removed {removed_count} selected domains', 'removed_count': removed_count, 'removed_domains': removed_domains})
 
+    @app.route('/api/remove_selected2', methods=['POST'])
+    @login_required
+    def remove_selected2(domains):
+        removed_count = 0
+        print(domains)
+        for domain in domains:
+            domain_obj = Domain.query.filter_by(name=domain, user_id=current_user.id).first()
+            if domain_obj:
+                db.session.delete(domain_obj)
+                db.session.commit()
+                removed_count += 1
+        return removed_count
 
     @app.route('/api/add_hashtags', methods=['POST'])
     @login_required
     def add_hashtags():
-        data = request.json
-        domains = data.get('domains', [])
-        hashtags = data.get('hashtags', '')
-
-        updated_count = Domain.query.filter(Domain.name.in_(domains)).update(
-            {Domain.hashtags: Domain.hashtags + ' ' + hashtags if Domain.hashtags else hashtags},
-            synchronize_session='fetch'
-        )
-        db.session.commit()
-
-        return jsonify({'message': f'Added hashtags to {updated_count} domains'})
+        domain_names = request.form.getlist('domain_names[]')
+        hashtags = request.form['hashtags']
+        updated_count = 0
+        for domain_name in domain_names:
+            domain = Domain.query.filter_by(name=domain_name, user_id=current_user.id).first()
+            if domain:
+                domain.hashtags = hashtags
+                db.session.commit()
+                updated_count += 1
+        return jsonify({'updated_count': updated_count})
 
 

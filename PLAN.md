@@ -1,5 +1,16 @@
 # PLAN
 
+
+
+1. Implement additional domain categorization rules to handle new gTLDs.
+2. Improve the 'remove_ns' function to handle a wider range of DNS server domains, including *.NS.CLOUDFLARE.COM.
+3. Add hashtag functionality for domains, including a new field in the Domain model, an API endpoint for adding hashtags, and UI elements in the list_domains.html template.
+4. Add timestamps to exported file names.
+5. Fix the 'remove_selected' function to correctly return the count of removed domains.
+6. Correct the categorization of domains with new gTLDs (e.g., solo.startup should be recognized as a TLD).
+
+
+
 + create domain extract from text/html/markdown file
 + extract domains from textarea input
 + list directly in table
