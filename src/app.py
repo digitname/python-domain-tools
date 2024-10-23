@@ -9,9 +9,10 @@ import logging
 
 from models import db, User, Domain
 from domain_utils import extract_domains, validate_domain, categorize_domain, add_custom_rule, remove_custom_rule, load_custom_rules
-from routes import register_routes
-from api import register_api_routes
-from auth import login_manager
+import api_routes
+import app_routes
+# from api import register_api_routes
+from auth import login_manager, load_user
 
 def create_app():
     app = Flask(__name__)
@@ -29,7 +30,8 @@ def create_app():
 
     # Initialize extensions
     db.init_app(app)
-    login_manager.init_app(app)  # Initialize the login_manager with the app
+    login_manager.init_app(app)
+    login_manager.user_loader(load_user)  # Register the load_user function with the login_manager
     migrate = Migrate(app, db)
     mail = Mail(app)
     cache = Cache(app, config={'CACHE_TYPE': 'simple'})
@@ -39,8 +41,8 @@ def create_app():
     logging.basicConfig(filename='app.log', level=logging.INFO)
 
     # Register routes
-    register_routes(app, mail, cache, limiter)
-    register_api_routes(app, mail, cache, limiter)
+    app_routes.register_routes(app, mail, cache, limiter)
+    api_routes.register_routes(app, mail, cache, limiter)
 
     # Create database tables
     with app.app_context():
