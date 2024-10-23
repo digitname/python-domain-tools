@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, send_file, jsonify, redirect, url_for, flash
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import sqlite3
 import csv
 import io
@@ -10,6 +12,8 @@ import logging
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'  # Change this to a secure random key
 login_manager.init_app(app)
+
+limiter = Limiter(app, key_func=get_remote_address)
 
 logging.basicConfig(filename='app.log', level=logging.INFO)
 
@@ -80,6 +84,7 @@ def export():
 
 @app.route('/api/domains', methods=['GET'])
 @login_required
+@limiter.limit("100 per day")
 def api_domains():
     conn = sqlite3.connect('domains.db')
     c = conn.cursor()
@@ -124,6 +129,16 @@ def bulk_import():
         else:
             flash('Please upload a CSV file')
     return render_template('bulk_import.html')
+
+@app.route('/admin')
+@login_required
+def admin():
+    if not current_user.is_admin:
+        flash('You do not have permission to access this page.')
+        return redirect(url_for('index'))
+    
+    # Add admin functionality here
+    return render_template('admin.html')
 
 if __name__ == '__main__':
     init_db()

@@ -18,10 +18,13 @@
 - [x] Implement domain validation and categorization
 - [x] Create a RESTful API for programmatic access
 - [x] Improve error handling and logging
+- [x] Implement more sophisticated domain categorization
+- [x] Add user roles and permissions
+- [x] Implement rate limiting for API access
 
 # Future Improvements
-- [ ] Implement more sophisticated domain categorization
-- [ ] Add user roles and permissions
-- [ ] Implement rate limiting for API access
-- [ ] Add support for exporting to more file formats
+- [ ] Add support for exporting to more file formats (e.g., Excel, PDF)
 - [ ] Implement data visualization for domain statistics
+- [ ] Add email notifications for bulk import results
+- [ ] Implement multi-factor authentication
+- [ ] Create a command-line interface (CLI) for the application

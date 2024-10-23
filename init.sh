@@ -9,6 +9,9 @@ source venv/bin/activate
 # Upgrade pip
 pip install --upgrade pip
 
+# Uninstall existing packages
+pip uninstall -y -r requirements.txt
+
 # Install requirements
 pip install -r requirements.txt
 
