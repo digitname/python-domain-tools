@@ -34,6 +34,7 @@
 - [x] Add database migration for email column
 - [x] Fix custom rules loading in template
 - [x] Create a separate page for listing domains with filtering and pagination
+- [x] Implement consistent Bootstrap-based styling across all pages
 
 # Future Improvements
 - [ ] Add support for exporting to PDF format
@@ -42,3 +43,4 @@
 - [ ] Implement email verification for new user registrations
 - [ ] Implement bulk actions for domain management (e.g., delete multiple domains)
 - [ ] Add domain health check functionality
+- [ ] Implement dark mode option

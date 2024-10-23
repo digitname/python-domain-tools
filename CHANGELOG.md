@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.4.0] - 2024-11-07
+
+### Added
+- Created a base template using Bootstrap for consistent styling
+- Updated all HTML templates to extend from the base template
+
+### Changed
+- Improved overall UI/UX with Bootstrap-based design
+- Reorganized navigation into a responsive navbar
+
 ## [2.3.0] - 2024-11-06
 
 ### Added
@@ -200,3 +210,4 @@ All notable changes to this project will be documented in this file.
 - Initial release of the Domain Extractor application
 - Basic domain extraction from plain text
 - Simple web interface for input and display of results
+

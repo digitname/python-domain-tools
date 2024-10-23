@@ -1,27 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Domain Statistics</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% extends "base.html" %}
+
+{% block title %}Statistics - Domain Extractor{% endblock %}
+
+{% block extra_css %}
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
         canvas {
             max-width: 100%;
             height: auto;
         }
     </style>
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
     <h1>Domain Statistics</h1>
     <p>Total Domains: {{ total_domains }}</p>
     <canvas id="categoryChart"></canvas>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         var ctx = document.getElementById('categoryChart').getContext('2d');
         var chart = new Chart(ctx, {
@@ -48,7 +45,4 @@
             }
         });
     </script>
-    <br>
-    <a href="{{ url_for('index') }}">Back to main page</a>
-</body>
-</html>
+{% endblock %}

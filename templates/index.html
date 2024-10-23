@@ -1,71 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Domain Extractor</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        textarea {
-            width: 100%;
-            height: 200px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        @media (max-width: 600px) {
-            body {
-                padding: 10px;
-            }
-            textarea {
-                height: 150px;
-            }
-        }
-    </style>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Home - Domain Extractor{% endblock %}
+
+{% block content %}
     <h1>Domain Extractor</h1>
-    <nav>
-        <a href="{{ url_for('index') }}">Home</a> |
-        <a href="{{ url_for('list_domains') }}">Domain List</a> |
-        <a href="{{ url_for('statistics') }}">Statistics</a> |
-        <a href="{{ url_for('custom_rules') }}">Custom Rules</a> |
-        <a href="{{ url_for('logout') }}">Logout</a>
-    </nav>
-    <form method="POST">
-        <textarea name="text" placeholder="Enter text containing domains..."></textarea>
-        <br><br>
-        <select name="file_type">
-            <option value="text">Plain Text</option>
-            <option value="html">HTML</option>
-            <option value="markdown">Markdown</option>
-        </select>
-        <input type="submit" value="Extract Domains">
+    <form method="POST" class="mb-4">
+        <div class="form-group">
+            <textarea name="text" class="form-control" rows="5" placeholder="Enter text containing domains..."></textarea>
+        </div>
+        <div class="form-group">
+            <select name="file_type" class="form-control">
+                <option value="text">Plain Text</option>
+                <option value="html">HTML</option>
+                <option value="markdown">Markdown</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Extract Domains</button>
     </form>
     
     <h2>Search Domains</h2>
-    <form method="GET" action="/search">
-        <input type="text" name="query" placeholder="Search domains..." value="{{ search_query }}">
-        <input type="submit" value="Search">
+    <form method="GET" action="{{ url_for('search') }}" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="query" class="form-control" placeholder="Search domains..." value="{{ search_query }}">
+            <div class="input-group-append">
+                <button type="submit" class="btn btn-outline-secondary">Search</button>
+            </div>
+        </div>
     </form>
 
     {% if domains %}
     <h2>Extracted Domains</h2>
-    <table>
+    <table class="table table-striped">
         <thead>
             <tr>
                 <th>Domain</th>
@@ -81,10 +46,10 @@
             {% endfor %}
         </tbody>
     </table>
-    <br>
-    <a href="{{ url_for('export', format='csv') }}">Export as CSV</a> |
-    <a href="{{ url_for('export', format='json') }}">Export as JSON</a> |
-    <a href="{{ url_for('export', format='excel') }}">Export as Excel</a>
+    <div class="btn-group" role="group">
+        <a href="{{ url_for('export', format='csv') }}" class="btn btn-secondary">Export as CSV</a>
+        <a href="{{ url_for('export', format='json') }}" class="btn btn-secondary">Export as JSON</a>
+        <a href="{{ url_for('export', format='excel') }}" class="btn btn-secondary">Export as Excel</a>
+    </div>
     {% endif %}
-</body>
-</html>
+{% endblock %}
