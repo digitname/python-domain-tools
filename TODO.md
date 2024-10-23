@@ -29,8 +29,11 @@
 - [x] Implement multi-factor authentication
 - [x] Implement automated testing with GitHub Actions
 - [x] Add support for custom domain categorization rules
+- [x] Implement user registration functionality
 
 # Future Improvements
 - [ ] Implement a caching mechanism to improve performance
 - [ ] Add support for exporting to PDF format
 - [ ] Implement real-time domain analysis using websockets
+- [ ] Add password reset functionality
+- [ ] Implement email verification for new user registrations

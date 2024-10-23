@@ -249,6 +249,28 @@ def remove_rule(rule):
         flash('Rule not found')
     return redirect(url_for('custom_rules'))
 
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        email = request.form['email']
+        
+        # Check if username already exists
+        if User.get_by_username(username):
+            flash('Username already exists. Please choose a different one.')
+            return redirect(url_for('register'))
+        
+        # Create new user
+        new_user = User.create(username, password, email)
+        if new_user:
+            flash('Registration successful. Please log in.')
+            return redirect(url_for('login'))
+        else:
+            flash('Registration failed. Please try again.')
+    
+    return render_template('register.html')
+
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)

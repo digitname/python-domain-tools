@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1.0] - 2024-11-02
+
+### Added
+- User registration functionality
+- New registration page and form
+- Email field for user accounts
+
+### Changed
+- Updated User model to include email field
+- Modified auth.py to support user creation
+- Updated login page to include link to registration
+
 ## [2.0.0] - 2024-11-01
 
 ### Added

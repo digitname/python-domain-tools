@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Domain Extractor</title>
+    <title>Register - Domain Extractor</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -11,7 +11,7 @@
             margin: 0 auto;
             padding: 20px;
         }
-        input[type="text"], input[type="password"] {
+        input[type="text"], input[type="password"], input[type="email"] {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
@@ -33,7 +33,7 @@
     </style>
 </head>
 <body>
-    <h1>Login</h1>
+    <h1>Register</h1>
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             {% for message in messages %}
@@ -44,8 +44,9 @@
     <form method="POST">
         <input type="text" name="username" placeholder="Username" required>
         <input type="password" name="password" placeholder="Password" required>
-        <input type="submit" value="Login">
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="submit" value="Register">
     </form>
-    <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
+    <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
 </body>
 </html>
