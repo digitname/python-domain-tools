@@ -31,6 +31,7 @@
 - [x] Add support for custom domain categorization rules
 - [x] Implement user registration functionality
 - [x] Implement a caching mechanism to improve performance
+- [x] Add database migration for email column
 
 # Future Improvements
 - [ ] Add support for exporting to PDF format

@@ -20,6 +20,10 @@ pip uninstall -y -r requirements.txt
 # Install requirements
 pip install -r requirements.txt
 
+# Run database migration
+rm domains.db
+python migrate_db.py
+
 # Initialize the database
 python -c "from app import init_db; init_db()"
 

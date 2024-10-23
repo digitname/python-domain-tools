@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.2.1] - 2024-11-04
+
+### Added
+- Database migration script to add email column to users table
+
+### Fixed
+- Issue with missing email column in users table
+
 ## [2.2.0] - 2024-11-03
 
 ### Added

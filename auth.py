@@ -70,7 +70,7 @@ def init_auth_db():
                   password TEXT NOT NULL,
                   is_admin BOOLEAN NOT NULL DEFAULT 0,
                   two_factor_secret TEXT,
-                  email TEXT UNIQUE NOT NULL)''')
+                  email TEXT UNIQUE)''')
     conn.commit()
     conn.close()
 
