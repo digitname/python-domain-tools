@@ -23,12 +23,14 @@
 - [x] Implement rate limiting for API access
 - [x] Create git_update.sh script for version management
 - [x] Create a command-line interface (CLI) for the application
+- [x] Add support for exporting to Excel format
+- [x] Implement data visualization for domain statistics
 
 # Future Improvements
-- [ ] Add support for exporting to more file formats (e.g., Excel, PDF)
-- [ ] Implement data visualization for domain statistics
 - [ ] Add email notifications for bulk import results
 - [ ] Implement multi-factor authentication
 - [ ] Implement automated testing with GitHub Actions
 - [ ] Add support for custom domain categorization rules
 - [ ] Implement a caching mechanism to improve performance
+- [ ] Add support for exporting to PDF format
+- [ ] Implement real-time domain analysis using websockets

@@ -1,6 +1,6 @@
 # Domain Extractor
 
-A web application for extracting, validating, and categorizing domain names from various input formats.
+A web application and command-line tool for extracting, validating, and categorizing domain names from various input formats.
 
 ## Features
 
@@ -12,6 +12,7 @@ A web application for extracting, validating, and categorizing domain names from
 - Export domains in CSV and JSON formats
 - RESTful API for programmatic access with rate limiting
 - Responsive web interface
+- Command-line interface (CLI) for quick domain operations
 
 ## Installation
 
@@ -32,20 +33,31 @@ A web application for extracting, validating, and categorizing domain names from
 3. Activate the virtual environment:   ```
    source venv/bin/activate   ```
 
-4. Run the application:   ```
-   python app.py   ```
-
-5. Access the application in your web browser at `http://localhost:5000`
-
 ## Usage
 
-1. Log in using your credentials
-2. Enter text containing domain names in the input field
-3. Select the input type (plain text, HTML, or Markdown)
-4. Click "Extract Domains" to process the input
-5. View the extracted domains and their categories
-6. Use the search function to find specific domains
-7. Export the results in CSV or JSON format
+### Web Application
+
+1. Run the application:   ```
+   python app.py   ```
+
+2. Access the application in your web browser at `http://localhost:5000`
+
+3. Log in using your credentials
+
+4. Use the web interface to extract, search, and manage domains
+
+### Command-Line Interface (CLI)
+
+The CLI provides quick access to domain operations:
+
+- Extract domains from text:  ```
+  python cli.py extract "Visit example.com and test.org"  ```
+
+- Validate a single domain:  ```
+  python cli.py validate example.com  ```
+
+- List all domains in the database:  ```
+  python cli.py list_domains  ```
 
 ## API Usage
 

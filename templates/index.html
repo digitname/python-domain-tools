@@ -39,6 +39,11 @@
 </head>
 <body>
     <h1>Domain Extractor</h1>
+    <nav>
+        <a href="{{ url_for('index') }}">Home</a> |
+        <a href="{{ url_for('statistics') }}">Statistics</a> |
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </nav>
     <form method="POST">
         <textarea name="text" placeholder="Enter text containing domains..."></textarea>
         <br><br>
@@ -76,7 +81,8 @@
     </table>
     <br>
     <a href="{{ url_for('export', format='csv') }}">Export as CSV</a> |
-    <a href="{{ url_for('export', format='json') }}">Export as JSON</a>
+    <a href="{{ url_for('export', format='json') }}">Export as JSON</a> |
+    <a href="{{ url_for('export', format='excel') }}">Export as Excel</a>
     {% endif %}
 </body>
 </html>

@@ -2,6 +2,40 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.0] - 2024-10-28
+
+### Added
+- Implemented data visualization for domain statistics
+- New statistics page with pie chart showing domain categories
+- Added Chart.js library for creating interactive charts
+
+### Changed
+- Updated app.py to include a new route for domain statistics
+- Modified index.html to include a link to the statistics page
+
+## [1.5.0] - 2024-10-27
+
+### Added
+- Support for exporting domains to Excel format
+- Added openpyxl library for Excel file generation
+
+### Changed
+- Updated export functionality in app.py to include Excel export
+- Modified index.html template to include Excel export option
+- Updated requirements.txt with openpyxl dependency
+
+## [1.4.0] - 2024-10-26
+
+### Added
+- Improved documentation in README.md
+- Added usage instructions for CLI in README.md
+
+### Changed
+- Updated init.sh script to include CLI setup
+
+### Fixed
+- Minor bug fixes and code improvements
+
 ## [1.3.0] - 2024-10-25
 
 ### Added

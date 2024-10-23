@@ -5,9 +5,11 @@ from flask_limiter.util import get_remote_address
 import sqlite3
 import csv
 import io
+import openpyxl
 from domain_extractor import extract_domains, validate_domain, categorize_domain
 from auth import User, init_auth_db, add_user, login_manager
 import logging
+from collections import Counter
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'  # Change this to a secure random key
@@ -81,6 +83,21 @@ def export():
         )
     elif format == 'json':
         return jsonify(domains)
+    elif format == 'excel':
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.append(['Domain', 'Category'])
+        for domain in domains:
+            ws.append([domain['domain'], domain['category']])
+        output = io.BytesIO()
+        wb.save(output)
+        output.seek(0)
+        return send_file(
+            output,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            attachment_filename='domains.xlsx'
+        )
 
 @app.route('/api/domains', methods=['GET'])
 @login_required
@@ -139,6 +156,19 @@ def admin():
     
     # Add admin functionality here
     return render_template('admin.html')
+
+@app.route('/statistics')
+@login_required
+def statistics():
+    conn = sqlite3.connect('domains.db')
+    c = conn.cursor()
+    c.execute("SELECT category, COUNT(*) FROM domains GROUP BY category")
+    category_stats = dict(c.fetchall())
+    c.execute("SELECT COUNT(DISTINCT domain) FROM domains")
+    total_domains = c.fetchone()[0]
+    conn.close()
+    
+    return render_template('statistics.html', category_stats=category_stats, total_domains=total_domains)
 
 if __name__ == '__main__':
     init_db()
