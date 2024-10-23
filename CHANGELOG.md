@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.0] - 2024-10-30
+
+### Added
+- Implemented multi-factor authentication using TOTP
+- New routes for two-factor authentication and enabling 2FA
+- Added pyotp library for generating and verifying TOTP tokens
+
+### Changed
+- Updated User model to include two_factor_secret
+- Modified login process to support 2FA
+- Added new templates for 2FA authentication and setup
+
 ## [1.7.0] - 2024-10-29
 
 ### Added

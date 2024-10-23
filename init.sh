@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # remove old environment
-deactivate
+#source venv/bin/deactivate
 rm -rf venv
 chmod +x *.sh
 

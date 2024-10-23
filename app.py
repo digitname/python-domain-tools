@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_file, jsonify, redirect, url_for, flash
+from flask import Flask, render_template, request, send_file, jsonify, redirect, url_for, flash, session
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -7,6 +7,7 @@ import sqlite3
 import csv
 import io
 import openpyxl
+import pyotp
 from domain_extractor import extract_domains, validate_domain, categorize_domain
 from auth import User, init_auth_db, add_user, login_manager
 import logging
@@ -128,10 +129,51 @@ def login():
         password = request.form['password']
         user = User.get_by_username(username)
         if user and user.check_password(password):
+            if user.two_factor_secret:
+                session['user_id'] = user.id
+                return redirect(url_for('two_factor_auth'))
             login_user(user)
             return redirect(url_for('index'))
         flash('Invalid username or password')
     return render_template('login.html')
+
+@app.route('/two_factor_auth', methods=['GET', 'POST'])
+def two_factor_auth():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    user = User.get(session['user_id'])
+    if not user:
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        token = request.form['token']
+        totp = pyotp.TOTP(user.two_factor_secret)
+        if totp.verify(token):
+            login_user(user)
+            session.pop('user_id', None)
+            return redirect(url_for('index'))
+        flash('Invalid token')
+    
+    return render_template('two_factor_auth.html')
+
+@app.route('/enable_2fa', methods=['GET', 'POST'])
+@login_required
+def enable_2fa():
+    if request.method == 'POST':
+        secret = pyotp.random_base32()
+        totp = pyotp.TOTP(secret)
+        token = request.form['token']
+        if totp.verify(token):
+            current_user.set_two_factor_secret(secret)
+            flash('Two-factor authentication enabled successfully')
+            return redirect(url_for('index'))
+        flash('Invalid token')
+    
+    secret = pyotp.random_base32()
+    totp = pyotp.TOTP(secret)
+    qr_code = totp.provisioning_uri(current_user.username, issuer_name="Domain Extractor")
+    return render_template('enable_2fa.html', qr_code=qr_code, secret=secret)
 
 @app.route('/logout')
 @login_required

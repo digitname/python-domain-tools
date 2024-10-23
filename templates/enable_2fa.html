@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enable Two-Factor Authentication</title>
+</head>
+<body>
+    <h1>Enable Two-Factor Authentication</h1>
+    <p>Scan the QR code with your authenticator app:</p>
+    <img src="{{ qr_code }}" alt="QR Code">
+    <p>Or enter this secret key manually: {{ secret }}</p>
+    <form method="POST">
+        <label for="token">Enter the 6-digit code from your authenticator app:</label>
+        <input type="text" id="token" name="token" required>
+        <input type="submit" value="Enable 2FA">
+    </form>
+</body>
+</html>

@@ -26,9 +26,9 @@
 - [x] Add support for exporting to Excel format
 - [x] Implement data visualization for domain statistics
 - [x] Add email notifications for bulk import results
+- [x] Implement multi-factor authentication
 
 # Future Improvements
-- [ ] Implement multi-factor authentication
 - [ ] Implement automated testing with GitHub Actions
 - [ ] Add support for custom domain categorization rules
 - [ ] Implement a caching mechanism to improve performance

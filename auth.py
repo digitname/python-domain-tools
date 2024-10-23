@@ -5,11 +5,12 @@ import sqlite3
 login_manager = LoginManager()
 
 class User(UserMixin):
-    def __init__(self, id, username, password, is_admin=False):
+    def __init__(self, id, username, password, is_admin=False, two_factor_secret=None):
         self.id = id
         self.username = username
         self.password = password
         self.is_admin = is_admin
+        self.two_factor_secret = two_factor_secret
 
     @staticmethod
     def get(user_id):
@@ -19,7 +20,7 @@ class User(UserMixin):
         user = c.fetchone()
         conn.close()
         if user:
-            return User(user[0], user[1], user[2], user[3])
+            return User(user[0], user[1], user[2], user[3], user[4])
         return None
 
     @staticmethod
@@ -30,11 +31,19 @@ class User(UserMixin):
         user = c.fetchone()
         conn.close()
         if user:
-            return User(user[0], user[1], user[2], user[3])
+            return User(user[0], user[1], user[2], user[3], user[4])
         return None
 
     def check_password(self, password):
         return check_password_hash(self.password, password)
+
+    def set_two_factor_secret(self, secret):
+        conn = sqlite3.connect('domains.db')
+        c = conn.cursor()
+        c.execute("UPDATE users SET two_factor_secret = ? WHERE id = ?", (secret, self.id))
+        conn.commit()
+        conn.close()
+        self.two_factor_secret = secret
 
 def init_auth_db():
     conn = sqlite3.connect('domains.db')
@@ -43,7 +52,8 @@ def init_auth_db():
                  (id INTEGER PRIMARY KEY AUTOINCREMENT,
                   username TEXT UNIQUE NOT NULL,
                   password TEXT NOT NULL,
-                  is_admin BOOLEAN NOT NULL DEFAULT 0)''')
+                  is_admin BOOLEAN NOT NULL DEFAULT 0,
+                  two_factor_secret TEXT)''')
     conn.commit()
     conn.close()
 
