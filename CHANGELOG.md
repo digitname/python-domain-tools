@@ -2,19 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.1.2] - 2023-04-18
+## [1.2.0] - 2024-10-24
+
+### Added
+- Improved documentation in README.md
+- Created git_update.sh script for easier version management
+- Updated init.sh script to create git_update.sh
+
+### Changed
+- Refactored domain_extractor.py to use tldextract for better domain categorization
+- Updated app.py to include admin functionality and rate limiting
+
+### Fixed
+- Resolved compatibility issues with markdown package
+
+## [1.1.2] - 2024-10-23
 
 ### Fixed
 - Updated markdown package to version 3.4.1 to resolve compatibility issues
 - Modified init.sh script to force reinstall packages
 
-## [1.1.1] - 2023-04-17
+## [1.1.1] - 2024-10-23
 
 ### Fixed
 - Updated init.sh script to use python3 explicitly
 - Added importlib-metadata to requirements.txt to resolve compatibility issues
 
-## [1.1.0] - 2023-04-16
+## [1.1.0] - 2024-10-23
 
 ### Added
 - Implemented more sophisticated domain categorization using tldextract
@@ -27,7 +41,7 @@ All notable changes to this project will be documented in this file.
 - Modified auth.py to include user roles
 - Updated app.py to include rate limiting and admin functionality
 
-## [1.0.0] - 2023-04-15
+## [1.0.0] - 2024-10-23
 
 ### Added
 - User authentication and authorization
@@ -46,7 +60,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Duplicate domain removal in extraction process
 
-## [0.1.0] - 2023-04-14
+## [0.1.0] - 2024-10-23
 
 ### Added
 - Initial release of the Domain Extractor application

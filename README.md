@@ -6,11 +6,11 @@ A web application for extracting, validating, and categorizing domain names from
 
 - Extract domains from plain text, HTML, and Markdown inputs
 - Validate and categorize extracted domains
-- User authentication and authorization
+- User authentication and authorization with admin roles
 - Bulk import of domains from CSV files
 - Search functionality for stored domains
 - Export domains in CSV and JSON formats
-- RESTful API for programmatic access
+- RESTful API for programmatic access with rate limiting
 - Responsive web interface
 
 ## Installation
@@ -19,20 +19,23 @@ A web application for extracting, validating, and categorizing domain names from
    git clone https://github.com/yourusername/domain-extractor.git
    cd domain-extractor   ```
 
-2. Create a virtual environment and activate it:   ```
-   python3 -m venv venv
+2. Run the initialization script:   ```
+   chmod +x init.sh
+   ./init.sh   ```
+
+   This script will:
+   - Create and activate a virtual environment
+   - Install required dependencies
+   - Initialize the database
+   - Create a git_update.sh script for easy version management
+
+3. Activate the virtual environment:   ```
    source venv/bin/activate   ```
 
-3. Install the required dependencies:   ```
-   pip install -r requirements.txt   ```
-
-4. Initialize the database and create an admin user:   ```
-   python init_db.py   ```
-
-5. Run the application:   ```
+4. Run the application:   ```
    python app.py   ```
 
-6. Access the application in your web browser at `http://localhost:5000`
+5. Access the application in your web browser at `http://localhost:5000`
 
 ## Usage
 
@@ -46,6 +49,6 @@ A web application for extracting, validating, and categorizing domain names from
 
 ## API Usage
 
-The API endpoint is available at `/api/domains`. You need to be authenticated to access the API.
+The API endpoint is available at `/api/domains`. You need to be authenticated to access the API. The API is rate-limited to 100 requests per day.
 
 Example API request:
