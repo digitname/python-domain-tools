@@ -4,6 +4,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_mail import Mail, Message
 from flask_caching import Cache
+from flask_sqlalchemy import SQLAlchemy
 import sqlite3
 import csv
 import io
@@ -17,7 +18,35 @@ from flask_paginate import Pagination
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'  # Change this to a secure random key
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///domains.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy()
+db.init_app(app)
+
 login_manager.init_app(app)
+
+# Define the Domain model
+class Domain(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), unique=True, nullable=False)
+    category = db.Column(db.String(50), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    def __repr__(self):
+        return f'<Domain {self.name}>'
+
+# Update the User model to include the relationship with Domain
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password = db.Column(db.String(120), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
+    two_factor_secret = db.Column(db.String(32))
+    domains = db.relationship('Domain', backref='user', lazy=True)
+
+    # ... (rest of the User model methods)
 
 # Cache configuration
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
@@ -37,45 +66,39 @@ limiter = Limiter(app, key_func=get_remote_address)
 logging.basicConfig(filename='app.log', level=logging.INFO)
 
 def init_db():
-    conn = sqlite3.connect('domains.db')
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS domains
-                 (id INTEGER PRIMARY KEY AUTOINCREMENT, domain TEXT UNIQUE, category TEXT)''')
-    conn.commit()
-    conn.close()
+    db.create_all()
     init_auth_db()
 
 def save_domains(domains):
-    conn = sqlite3.connect('domains.db')
-    c = conn.cursor()
     for domain in domains:
         if validate_domain(domain):
             category = categorize_domain(domain)
-            c.execute("INSERT OR IGNORE INTO domains (domain, category) VALUES (?, ?)", (domain, category))
-    conn.commit()
-    conn.close()
+            db.session.add(Domain(name=domain, category=category, user_id=current_user.id))
+    db.session.commit()
 
 @app.route('/', methods=['GET', 'POST'])
 @login_required
 def index():
-    domains = []
     if request.method == 'POST':
         text = request.form['text']
-        file_type = request.form['file_type']
-        domains = extract_domains(text, file_type)
-        save_domains(domains)
-    return render_template('index.html', domains=domains)
+        extracted_domains = extract_domains(text)
+        save_domains(extracted_domains)
+        flash(f'Successfully extracted and saved {len(extracted_domains)} domains.')
+        return redirect(url_for('index'))
+
+    domains = Domain.query.filter_by(user_id=current_user.id).all()
+    
+    # Calculate category statistics
+    category_stats = Counter(domain.category for domain in domains)
+    
+    return render_template('index.html', domains=domains, category_stats=category_stats)
 
 @app.route('/search', methods=['GET'])
 @login_required
 @cache.cached(timeout=300, query_string=True)
 def search():
     query = request.args.get('query', '')
-    conn = sqlite3.connect('domains.db')
-    c = conn.cursor()
-    c.execute("SELECT domain, category FROM domains WHERE domain LIKE ?", (f'%{query}%',))
-    domains = [{'domain': row[0], 'category': row[1]} for row in c.fetchall()]
-    conn.close()
+    domains = Domain.query.filter(Domain.name.ilike(f'%{query}%')).all()
     return render_template('index.html', domains=domains, search_query=query)
 
 @app.route('/export', methods=['GET'])
@@ -83,17 +106,13 @@ def search():
 @cache.cached(timeout=300, query_string=True)
 def export():
     format = request.args.get('format', 'csv')
-    conn = sqlite3.connect('domains.db')
-    c = conn.cursor()
-    c.execute("SELECT domain, category FROM domains")
-    domains = [{'domain': row[0], 'category': row[1]} for row in c.fetchall()]
-    conn.close()
+    domains = Domain.query.all()
 
     if format == 'csv':
         output = io.StringIO()
         writer = csv.writer(output)
         writer.writerow(['Domain', 'Category'])
-        writer.writerows([[d['domain'], d['category']] for d in domains])
+        writer.writerows([[domain.name, domain.category] for domain in domains])
         return send_file(
             io.BytesIO(output.getvalue().encode('utf-8')),
             mimetype='text/csv',
@@ -101,13 +120,13 @@ def export():
             attachment_filename='domains.csv'
         )
     elif format == 'json':
-        return jsonify(domains)
+        return jsonify([{'domain': domain.name, 'category': domain.category} for domain in domains])
     elif format == 'excel':
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.append(['Domain', 'Category'])
         for domain in domains:
-            ws.append([domain['domain'], domain['category']])
+            ws.append([domain.name, domain.category])
         output = io.BytesIO()
         wb.save(output)
         output.seek(0)
@@ -123,19 +142,15 @@ def export():
 @limiter.limit("100 per day")
 @cache.cached(timeout=300)
 def api_domains():
-    conn = sqlite3.connect('domains.db')
-    c = conn.cursor()
-    c.execute("SELECT domain, category FROM domains")
-    domains = [{'domain': row[0], 'category': row[1]} for row in c.fetchall()]
-    conn.close()
-    return jsonify(domains)
+    domains = Domain.query.all()
+    return jsonify([{'domain': domain.name, 'category': domain.category} for domain in domains])
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        user = User.get_by_username(username)
+        user = User.query.filter_by(username=username).first()
         if user and user.check_password(password):
             if user.two_factor_secret:
                 session['user_id'] = user.id
@@ -150,7 +165,7 @@ def two_factor_auth():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     
-    user = User.get(session['user_id'])
+    user = User.query.get(session['user_id'])
     if not user:
         return redirect(url_for('login'))
     
@@ -229,13 +244,8 @@ def admin():
 @login_required
 @cache.cached(timeout=300)
 def statistics():
-    conn = sqlite3.connect('domains.db')
-    c = conn.cursor()
-    c.execute("SELECT category, COUNT(*) FROM domains GROUP BY category")
-    category_stats = dict(c.fetchall())
-    c.execute("SELECT COUNT(DISTINCT domain) FROM domains")
-    total_domains = c.fetchone()[0]
-    conn.close()
+    category_stats = Counter(domain.category for domain in Domain.query.all())
+    total_domains = Domain.query.count()
     
     return render_template('statistics.html', category_stats=category_stats, total_domains=total_domains)
 
@@ -268,7 +278,7 @@ def register():
         email = request.form['email']
         
         # Check if username already exists
-        if User.get_by_username(username):
+        if User.query.filter_by(username=username).first():
             flash('Username already exists. Please choose a different one.')
             return redirect(url_for('register'))
         
@@ -290,45 +300,23 @@ def list_domains():
     search_query = request.args.get('search', '')
     category_filter = request.args.get('category', '')
 
-    conn = sqlite3.connect('domains.db')
-    c = conn.cursor()
-
-    # Base query
-    query = "SELECT domain, category FROM domains"
-    params = []
-
-    # Apply filters
+    query = Domain.query.filter_by(user_id=current_user.id)
     if search_query:
-        query += " WHERE domain LIKE ?"
-        params.append(f'%{search_query}%')
-    
+        query = query.filter(Domain.name.ilike(f'%{search_query}%'))
     if category_filter:
-        if 'WHERE' in query:
-            query += " AND category = ?"
-        else:
-            query += " WHERE category = ?"
-        params.append(category_filter)
+        query = query.filter(Domain.category == category_filter)
 
-    # Get total count
-    c.execute(f"SELECT COUNT(*) FROM ({query})", params)
-    total = c.fetchone()[0]
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    domains = pagination.items
 
-    # Apply pagination
-    query += f" LIMIT {per_page} OFFSET {(page - 1) * per_page}"
-    
-    c.execute(query, params)
-    domains = [{'domain': row[0], 'category': row[1]} for row in c.fetchall()]
+    categories = Domain.query.with_entities(Domain.category).distinct().all()
+    categories = [category[0] for category in categories]
 
-    # Get unique categories for the filter dropdown
-    c.execute("SELECT DISTINCT category FROM domains")
-    categories = [row[0] for row in c.fetchall()]
-
-    conn.close()
-
-    pagination = Pagination(page=page, total=total, per_page=per_page, css_framework='bootstrap4')
-
-    return render_template('list_domains.html', domains=domains, pagination=pagination, 
-                           search_query=search_query, category_filter=category_filter, 
+    return render_template('list_domains.html', 
+                           domains=domains, 
+                           pagination=pagination,
+                           search_query=search_query, 
+                           category_filter=category_filter, 
                            categories=categories)
 
 @app.route('/api/list_domains', methods=['GET'])
@@ -339,86 +327,51 @@ def api_list_domains():
     search_query = request.args.get('search', '')
     category_filter = request.args.get('category', '')
 
-    conn = sqlite3.connect('domains.db')
-    c = conn.cursor()
-
-    # Base query
-    query = "SELECT domain, category FROM domains"
-    params = []
-
-    # Apply filters
-    if search_query:
-        query += " WHERE domain LIKE ?"
-        params.append(f'%{search_query}%')
-    
+    domains = Domain.query.filter(Domain.name.ilike(f'%{search_query}%'))
     if category_filter:
-        if 'WHERE' in query:
-            query += " AND category = ?"
-        else:
-            query += " WHERE category = ?"
-        params.append(category_filter)
+        domains = domains.filter(Domain.category == category_filter)
 
-    # Get total count
-    c.execute(f"SELECT COUNT(*) FROM ({query})", params)
-    total = c.fetchone()[0]
-
-    # Apply pagination
-    query += f" LIMIT {per_page} OFFSET {(page - 1) * per_page}"
-    
-    c.execute(query, params)
-    domains = [{'domain': row[0], 'category': row[1]} for row in c.fetchall()]
-
-    conn.close()
+    total = domains.count()
+    domains = domains.paginate(page, per_page, False)
 
     pagination = Pagination(page=page, total=total, per_page=per_page, css_framework='bootstrap4')
     
     return jsonify({
-        'domains': domains,
+        'domains': [{'domain': domain.name, 'category': domain.category} for domain in domains],
         'pagination': pagination.links
     })
 
 @app.route('/api/remove_ns', methods=['POST'])
 @login_required
 def remove_ns():
-    conn = sqlite3.connect('domains.db')
-    c = conn.cursor()
-    c.execute("DELETE FROM domains WHERE domain LIKE 'ns%'")
-    removed_count = c.rowcount
-    conn.commit()
-    conn.close()
-    return jsonify({'message': f'Removed {removed_count} NS server domains'})
+    Domain.query.filter(Domain.name.like('ns%')).delete()
+    db.session.commit()
+    return jsonify({'message': f'Removed {db.session.rowcount} NS server domains'})
 
 @app.route('/api/remove_subdomains', methods=['POST'])
 @login_required
 def remove_subdomains():
-    conn = sqlite3.connect('domains.db')
-    c = conn.cursor()
-    c.execute("SELECT domain FROM domains")
-    domains = [row[0] for row in c.fetchall()]
+    domains = Domain.query.all()
     
     removed_count = 0
     for domain in domains:
-        parts = domain.split('.')
+        parts = domain.name.split('.')
         if len(parts) > 2:
-            c.execute("DELETE FROM domains WHERE domain = ?", (domain,))
+            Domain.query.filter(Domain.name == domain.name).delete()
             removed_count += 1
     
-    conn.commit()
-    conn.close()
+    db.session.commit()
     return jsonify({'message': f'Removed {removed_count} subdomains'})
 
 @app.route('/api/remove_selected', methods=['POST'])
 @login_required
 def remove_selected():
     domains = request.json.get('domains', [])
-    conn = sqlite3.connect('domains.db')
-    c = conn.cursor()
-    c.executemany("DELETE FROM domains WHERE domain = ?", [(domain,) for domain in domains])
-    removed_count = c.rowcount
-    conn.commit()
-    conn.close()
-    return jsonify({'message': f'Removed {removed_count} selected domains'})
+    Domain.query.filter(Domain.name.in_(domains)).delete()
+    db.session.commit()
+    return jsonify({'message': f'Removed {db.session.rowcount} selected domains'})
 
 if __name__ == '__main__':
-    init_db()
+    with app.app_context():
+        db.create_all()
     app.run(debug=True)

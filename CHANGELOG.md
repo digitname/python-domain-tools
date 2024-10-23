@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.8.0] - 2024-10-26
+
+### Added
+- Sorting functionality for domain list (by domain name and category)
+- Display all domains without pagination
+
+### Changed
+- Updated list_domains route in app.py to support sorting
+- Modified list_domains.html template to include sorting links and indicators
+
+## [2.7.0] - 2024-10-25
+
+### Added
+- Real-time statistics update after each domain extraction
+- Display of current statistics on the index page
+
+### Changed
+- Removed pagination from the domain list page
+- Updated domain list filtering to use form submission instead of dynamic updates
+
 ## [2.6.0] - 2024-10-24
 
 ### Added

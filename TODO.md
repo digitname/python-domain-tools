@@ -37,6 +37,9 @@
 - [x] Implement consistent Bootstrap-based styling across all pages
 - [x] Implement dynamic filtering and searching for domain list
 - [x] Add actions to clean up domain list (remove NS servers, subdomains, selected domains)
+- [x] List domains without pagination
+- [x] Update statistics after each extraction
+- [x] Implement sorting for domain list
 
 # Future Improvements
 - [ ] Add support for exporting to PDF format
@@ -50,3 +53,5 @@
 - [ ] Implement server-side caching for frequently accessed data
 - [ ] Add undo functionality for domain removal actions
 - [ ] Implement domain categorization based on machine learning
+- [ ] Add data visualization for domain statistics trends over time
+- [ ] Implement lazy loading for large domain lists

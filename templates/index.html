@@ -3,53 +3,41 @@
 {% block title %}Home - Domain Extractor{% endblock %}
 
 {% block content %}
-    <h1>Domain Extractor</h1>
-    <form method="POST" class="mb-4">
+    <h1>Welcome, {{ current_user.username }}!</h1>
+
+    <h2>Extract Domains</h2>
+    <form method="POST" action="{{ url_for('index') }}">
         <div class="form-group">
-            <textarea name="text" class="form-control" rows="5" placeholder="Enter text containing domains..."></textarea>
-        </div>
-        <div class="form-group">
-            <select name="file_type" class="form-control">
-                <option value="text">Plain Text</option>
-                <option value="html">HTML</option>
-                <option value="markdown">Markdown</option>
-            </select>
+            <label for="text">Enter text containing domains:</label>
+            <textarea class="form-control" id="text" name="text" rows="5" required></textarea>
         </div>
         <button type="submit" class="btn btn-primary">Extract Domains</button>
     </form>
-    
-    <h2>Search Domains</h2>
-    <form method="GET" action="{{ url_for('search') }}" class="mb-4">
-        <div class="input-group">
-            <input type="text" name="query" class="form-control" placeholder="Search domains..." value="{{ search_query }}">
-            <div class="input-group-append">
-                <button type="submit" class="btn btn-outline-secondary">Search</button>
-            </div>
-        </div>
-    </form>
 
-    {% if domains %}
-    <h2>Extracted Domains</h2>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Domain</th>
-                <th>Category</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for domain in domains %}
-            <tr>
-                <td>{{ domain.domain }}</td>
-                <td>{{ domain.category }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <h2>Your Domains</h2>
+    <ul>
+        {% for domain in domains %}
+        <li>{{ domain.name }} ({{ domain.category }})</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Category Statistics</h2>
+    <ul>
+        {% for category, count in category_stats.items() %}
+        <li>{{ category }}: {{ count }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Actions</h2>
+    <a href="{{ url_for('list_domains') }}" class="btn btn-secondary">View All Domains</a>
+    <a href="{{ url_for('bulk_import') }}" class="btn btn-secondary">Bulk Import</a>
+    <a href="{{ url_for('statistics') }}" class="btn btn-secondary">View Statistics</a>
+    <a href="{{ url_for('custom_rules') }}" class="btn btn-secondary">Manage Custom Rules</a>
+
+    <h2>Export</h2>
     <div class="btn-group" role="group">
         <a href="{{ url_for('export', format='csv') }}" class="btn btn-secondary">Export as CSV</a>
         <a href="{{ url_for('export', format='json') }}" class="btn btn-secondary">Export as JSON</a>
         <a href="{{ url_for('export', format='excel') }}" class="btn btn-secondary">Export as Excel</a>
     </div>
-    {% endif %}
 {% endblock %}

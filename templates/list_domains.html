@@ -4,86 +4,77 @@
 
 {% block content %}
     <h1>Domain List</h1>
-    <form id="filter-form" class="mb-4">
-        <div class="form-row">
-            <div class="col">
-                <input type="text" id="search" name="search" class="form-control" placeholder="Search domains..." value="{{ search_query }}">
-            </div>
-            <div class="col">
-                <select id="category" name="category" class="form-control">
-                    <option value="">All Categories</option>
-                    {% for category in categories %}
-                    <option value="{{ category }}" {% if category == category_filter %}selected{% endif %}>{{ category }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
+
+    <form method="GET" action="{{ url_for('list_domains') }}">
+        <input type="text" name="search" value="{{ search_query }}" placeholder="Search domains">
+        <select name="category">
+            <option value="">All Categories</option>
+            {% for category in categories %}
+            <option value="{{ category }}" {% if category == category_filter %}selected{% endif %}>{{ category }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Search</button>
     </form>
 
-    <div class="mb-3">
-        <button id="remove-ns" class="btn btn-warning">Remove NS Servers</button>
-        <button id="remove-subdomains" class="btn btn-warning">Remove Subdomains</button>
-        <button id="remove-selected" class="btn btn-danger" disabled>Remove Selected</button>
-    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Domain</th>
+                <th>Category</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for domain in domains %}
+            <tr>
+                <td>{{ domain.name }}</td>
+                <td>{{ domain.category }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-    <div id="domains-table">
-        <!-- This will be populated dynamically -->
-    </div>
-
-    <div id="pagination">
-        <!-- This will be populated dynamically -->
-    </div>
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            {% if pagination.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('list_domains', page=pagination.prev_num, search=search_query, category=category_filter) }}">Previous</a>
+            </li>
+            {% endif %}
+            {% for page in pagination.iter_pages() %}
+            {% if page %}
+                {% if page != pagination.page %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('list_domains', page=page, search=search_query, category=category_filter) }}">{{ page }}</a>
+                </li>
+                {% else %}
+                <li class="page-item active">
+                    <span class="page-link">{{ page }}</span>
+                </li>
+                {% endif %}
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            {% endif %}
+            {% endfor %}
+            {% if pagination.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('list_domains', page=pagination.next_num, search=search_query, category=category_filter) }}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    function updateDomains(page = 1) {
-        const search = document.getElementById('search').value;
-        const category = document.getElementById('category').value;
-        
-        fetch(`/api/list_domains?page=${page}&search=${search}&category=${category}`)
-            .then(response => response.json())
-            .then(data => {
-                const tableHtml = `
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th><input type="checkbox" id="select-all"></th>
-                                <th>Domain</th>
-                                <th>Category</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${data.domains.map(domain => `
-                                <tr>
-                                    <td><input type="checkbox" class="domain-checkbox" data-domain="${domain.domain}"></td>
-                                    <td>${domain.domain}</td>
-                                    <td>${domain.category}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                `;
-                document.getElementById('domains-table').innerHTML = tableHtml;
-                document.getElementById('pagination').innerHTML = data.pagination;
-                updateRemoveSelectedButton();
-            });
-    }
-
     function updateRemoveSelectedButton() {
         const checkboxes = document.querySelectorAll('.domain-checkbox:checked');
         document.getElementById('remove-selected').disabled = checkboxes.length === 0;
     }
 
-    document.getElementById('search').addEventListener('input', () => updateDomains());
-    document.getElementById('category').addEventListener('change', () => updateDomains());
-    document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('page-link')) {
-            e.preventDefault();
-            const page = e.target.getAttribute('data-page');
-            updateDomains(page);
-        }
-    });
+    document.getElementById('search').addEventListener('input', () => document.getElementById('filter-form').submit());
+    document.getElementById('category').addEventListener('change', () => document.getElementById('filter-form').submit());
 
     document.getElementById('remove-ns').addEventListener('click', () => {
         fetch('/api/remove_ns', { method: 'POST' })

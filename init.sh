@@ -5,6 +5,7 @@
 rm -rf venv
 rm app.log
 rm domains.db
+date +%Y-%m-%d > .date
 
 chmod +x *.sh
 
