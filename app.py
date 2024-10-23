@@ -331,6 +331,52 @@ def list_domains():
                            search_query=search_query, category_filter=category_filter, 
                            categories=categories)
 
+@app.route('/api/list_domains', methods=['GET'])
+@login_required
+def api_list_domains():
+    page = request.args.get('page', 1, type=int)
+    per_page = 20  # Number of domains per page
+    search_query = request.args.get('search', '')
+    category_filter = request.args.get('category', '')
+
+    conn = sqlite3.connect('domains.db')
+    c = conn.cursor()
+
+    # Base query
+    query = "SELECT domain, category FROM domains"
+    params = []
+
+    # Apply filters
+    if search_query:
+        query += " WHERE domain LIKE ?"
+        params.append(f'%{search_query}%')
+    
+    if category_filter:
+        if 'WHERE' in query:
+            query += " AND category = ?"
+        else:
+            query += " WHERE category = ?"
+        params.append(category_filter)
+
+    # Get total count
+    c.execute(f"SELECT COUNT(*) FROM ({query})", params)
+    total = c.fetchone()[0]
+
+    # Apply pagination
+    query += f" LIMIT {per_page} OFFSET {(page - 1) * per_page}"
+    
+    c.execute(query, params)
+    domains = [{'domain': row[0], 'category': row[1]} for row in c.fetchall()]
+
+    conn.close()
+
+    pagination = Pagination(page=page, total=total, per_page=per_page, css_framework='bootstrap4')
+    
+    return jsonify({
+        'domains': domains,
+        'pagination': pagination.links
+    })
+
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)

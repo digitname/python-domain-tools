@@ -4,41 +4,74 @@
 
 {% block content %}
     <h1>Domain List</h1>
-    <form method="GET" action="{{ url_for('list_domains') }}" class="mb-4">
+    <form id="filter-form" class="mb-4">
         <div class="form-row">
             <div class="col">
-                <input type="text" name="search" class="form-control" placeholder="Search domains..." value="{{ search_query }}">
+                <input type="text" id="search" name="search" class="form-control" placeholder="Search domains..." value="{{ search_query }}">
             </div>
             <div class="col">
-                <select name="category" class="form-control">
+                <select id="category" name="category" class="form-control">
                     <option value="">All Categories</option>
                     {% for category in categories %}
                     <option value="{{ category }}" {% if category == category_filter %}selected{% endif %}>{{ category }}</option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="col">
-                <button type="submit" class="btn btn-primary">Filter</button>
-            </div>
         </div>
     </form>
 
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Domain</th>
-                <th>Category</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for domain in domains %}
-            <tr>
-                <td>{{ domain.domain }}</td>
-                <td>{{ domain.category }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div id="domains-table">
+        <!-- This will be populated dynamically -->
+    </div>
 
-    {{ pagination.links }}
+    <div id="pagination">
+        <!-- This will be populated dynamically -->
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function updateDomains(page = 1) {
+        const search = document.getElementById('search').value;
+        const category = document.getElementById('category').value;
+        
+        fetch(`/api/list_domains?page=${page}&search=${search}&category=${category}`)
+            .then(response => response.json())
+            .then(data => {
+                const tableHtml = `
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Domain</th>
+                                <th>Category</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.domains.map(domain => `
+                                <tr>
+                                    <td>${domain.domain}</td>
+                                    <td>${domain.category}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                document.getElementById('domains-table').innerHTML = tableHtml;
+                document.getElementById('pagination').innerHTML = data.pagination;
+            });
+    }
+
+    document.getElementById('search').addEventListener('input', () => updateDomains());
+    document.getElementById('category').addEventListener('change', () => updateDomains());
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('page-link')) {
+            e.preventDefault();
+            const page = e.target.getAttribute('data-page');
+            updateDomains(page);
+        }
+    });
+
+    // Initial load
+    updateDomains();
+</script>
 {% endblock %}

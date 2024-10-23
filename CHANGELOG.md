@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.5.0] - 2024-11-08
+
+### Added
+- Dynamic filtering and searching for domain list
+- New API endpoint for listing domains with filters
+
+### Changed
+- Updated list_domains.html to use JavaScript for dynamic updates
+- Modified app.py to include new API route for listing domains
+
 ## [2.4.0] - 2024-11-07
 
 ### Added
@@ -210,4 +220,3 @@ All notable changes to this project will be documented in this file.
 - Initial release of the Domain Extractor application
 - Basic domain extraction from plain text
 - Simple web interface for input and display of results
-

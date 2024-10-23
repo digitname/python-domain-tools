@@ -35,6 +35,7 @@
 - [x] Fix custom rules loading in template
 - [x] Create a separate page for listing domains with filtering and pagination
 - [x] Implement consistent Bootstrap-based styling across all pages
+- [x] Implement dynamic filtering and searching for domain list
 
 # Future Improvements
 - [ ] Add support for exporting to PDF format
@@ -44,3 +45,5 @@
 - [ ] Implement bulk actions for domain management (e.g., delete multiple domains)
 - [ ] Add domain health check functionality
 - [ ] Implement dark mode option
+- [ ] Optimize database queries for large datasets
+- [ ] Implement server-side caching for frequently accessed data
