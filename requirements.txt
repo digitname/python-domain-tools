@@ -11,6 +11,7 @@ openpyxl==3.0.9
 Flask-Mail==0.9.1
 pyotp==2.6.0
 Flask-Caching==1.10.1
+flask-paginate==0.8.1
 
 
 

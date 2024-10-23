@@ -13,6 +13,7 @@ from domain_extractor import extract_domains, validate_domain, categorize_domain
 from auth import User, init_auth_db, add_user, login_manager
 import logging
 from collections import Counter
+from flask_paginate import Pagination
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'  # Change this to a secure random key
@@ -280,6 +281,55 @@ def register():
             flash('Registration failed. Please try again.')
     
     return render_template('register.html')
+
+@app.route('/domains', methods=['GET'])
+@login_required
+def list_domains():
+    page = request.args.get('page', 1, type=int)
+    per_page = 20  # Number of domains per page
+    search_query = request.args.get('search', '')
+    category_filter = request.args.get('category', '')
+
+    conn = sqlite3.connect('domains.db')
+    c = conn.cursor()
+
+    # Base query
+    query = "SELECT domain, category FROM domains"
+    params = []
+
+    # Apply filters
+    if search_query:
+        query += " WHERE domain LIKE ?"
+        params.append(f'%{search_query}%')
+    
+    if category_filter:
+        if 'WHERE' in query:
+            query += " AND category = ?"
+        else:
+            query += " WHERE category = ?"
+        params.append(category_filter)
+
+    # Get total count
+    c.execute(f"SELECT COUNT(*) FROM ({query})", params)
+    total = c.fetchone()[0]
+
+    # Apply pagination
+    query += f" LIMIT {per_page} OFFSET {(page - 1) * per_page}"
+    
+    c.execute(query, params)
+    domains = [{'domain': row[0], 'category': row[1]} for row in c.fetchall()]
+
+    # Get unique categories for the filter dropdown
+    c.execute("SELECT DISTINCT category FROM domains")
+    categories = [row[0] for row in c.fetchall()]
+
+    conn.close()
+
+    pagination = Pagination(page=page, total=total, per_page=per_page, css_framework='bootstrap4')
+
+    return render_template('list_domains.html', domains=domains, pagination=pagination, 
+                           search_query=search_query, category_filter=category_filter, 
+                           categories=categories)
 
 if __name__ == '__main__':
     init_db()

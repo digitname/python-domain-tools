@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.3.0] - 2024-11-06
+
+### Added
+- New page for listing domains with filtering and pagination
+- Search functionality for domains by name and category
+- Pagination for the domain list
+
+### Changed
+- Updated navigation to include a link to the new domain list page
+- Added flask-paginate to requirements.txt
+
 ## [2.2.2] - 2024-11-05
 
 ### Fixed

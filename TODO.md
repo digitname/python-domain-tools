@@ -33,9 +33,12 @@
 - [x] Implement a caching mechanism to improve performance
 - [x] Add database migration for email column
 - [x] Fix custom rules loading in template
+- [x] Create a separate page for listing domains with filtering and pagination
 
 # Future Improvements
 - [ ] Add support for exporting to PDF format
 - [ ] Implement real-time domain analysis using websockets
 - [ ] Add password reset functionality
 - [ ] Implement email verification for new user registrations
+- [ ] Implement bulk actions for domain management (e.g., delete multiple domains)
+- [ ] Add domain health check functionality
