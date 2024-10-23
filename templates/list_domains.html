@@ -20,6 +20,12 @@
         </div>
     </form>
 
+    <div class="mb-3">
+        <button id="remove-ns" class="btn btn-warning">Remove NS Servers</button>
+        <button id="remove-subdomains" class="btn btn-warning">Remove Subdomains</button>
+        <button id="remove-selected" class="btn btn-danger" disabled>Remove Selected</button>
+    </div>
+
     <div id="domains-table">
         <!-- This will be populated dynamically -->
     </div>
@@ -42,6 +48,7 @@
                     <table class="table table-striped">
                         <thead>
                             <tr>
+                                <th><input type="checkbox" id="select-all"></th>
                                 <th>Domain</th>
                                 <th>Category</th>
                             </tr>
@@ -49,6 +56,7 @@
                         <tbody>
                             ${data.domains.map(domain => `
                                 <tr>
+                                    <td><input type="checkbox" class="domain-checkbox" data-domain="${domain.domain}"></td>
                                     <td>${domain.domain}</td>
                                     <td>${domain.category}</td>
                                 </tr>
@@ -58,7 +66,13 @@
                 `;
                 document.getElementById('domains-table').innerHTML = tableHtml;
                 document.getElementById('pagination').innerHTML = data.pagination;
+                updateRemoveSelectedButton();
             });
+    }
+
+    function updateRemoveSelectedButton() {
+        const checkboxes = document.querySelectorAll('.domain-checkbox:checked');
+        document.getElementById('remove-selected').disabled = checkboxes.length === 0;
     }
 
     document.getElementById('search').addEventListener('input', () => updateDomains());
@@ -68,6 +82,52 @@
             e.preventDefault();
             const page = e.target.getAttribute('data-page');
             updateDomains(page);
+        }
+    });
+
+    document.getElementById('remove-ns').addEventListener('click', () => {
+        fetch('/api/remove_ns', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                updateDomains();
+            });
+    });
+
+    document.getElementById('remove-subdomains').addEventListener('click', () => {
+        fetch('/api/remove_subdomains', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                updateDomains();
+            });
+    });
+
+    document.getElementById('remove-selected').addEventListener('click', () => {
+        const selectedDomains = Array.from(document.querySelectorAll('.domain-checkbox:checked'))
+            .map(checkbox => checkbox.getAttribute('data-domain'));
+        fetch('/api/remove_selected', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ domains: selectedDomains }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                updateDomains();
+            });
+    });
+
+    document.addEventListener('change', (e) => {
+        if (e.target.id === 'select-all') {
+            document.querySelectorAll('.domain-checkbox').forEach(checkbox => {
+                checkbox.checked = e.target.checked;
+            });
+        }
+        if (e.target.classList.contains('domain-checkbox') || e.target.id === 'select-all') {
+            updateRemoveSelectedButton();
         }
     });
 

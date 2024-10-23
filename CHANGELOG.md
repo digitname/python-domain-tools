@@ -2,7 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2.5.0] - 2024-11-08
+## [2.6.0] - 2024-10-24
+
+### Added
+- New actions to clean up domain list:
+  - Remove NS server domains
+  - Remove subdomains
+  - Remove selected domains
+- Checkboxes for selecting individual domains
+- API endpoints for new domain list actions
+
+### Changed
+- Updated list_domains.html to include new action buttons and checkboxes
+- Modified app.py to include new API routes for domain list actions
+
+## [2.5.0] - 2024-10-23
 
 ### Added
 - Dynamic filtering and searching for domain list
@@ -12,7 +26,7 @@ All notable changes to this project will be documented in this file.
 - Updated list_domains.html to use JavaScript for dynamic updates
 - Modified app.py to include new API route for listing domains
 
-## [2.4.0] - 2024-11-07
+## [2.4.0] - 2024-10-23
 
 ### Added
 - Created a base template using Bootstrap for consistent styling
@@ -22,7 +36,7 @@ All notable changes to this project will be documented in this file.
 - Improved overall UI/UX with Bootstrap-based design
 - Reorganized navigation into a responsive navbar
 
-## [2.3.0] - 2024-11-06
+## [2.3.0] - 2024-10-23
 
 ### Added
 - New page for listing domains with filtering and pagination
@@ -33,12 +47,12 @@ All notable changes to this project will be documented in this file.
 - Updated navigation to include a link to the new domain list page
 - Added flask-paginate to requirements.txt
 
-## [2.2.2] - 2024-11-05
+## [2.2.2] - 2024-10-23
 
 ### Fixed
 - Resolved issue with custom rules not being properly loaded in the template
 
-## [2.2.1] - 2024-11-04
+## [2.2.1] - 2024-10-23
 
 ### Added
 - Database migration script to add email column to users table
@@ -46,7 +60,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Issue with missing email column in users table
 
-## [2.2.0] - 2024-11-03
+## [2.2.0] - 2024-10-23
 
 ### Added
 - Implemented caching mechanism using Flask-Caching
@@ -56,7 +70,7 @@ All notable changes to this project will be documented in this file.
 - Updated app.py to include caching configuration and decorators
 - Added Flask-Caching to requirements.txt
 
-## [2.1.0] - 2024-11-02
+## [2.1.0] - 2024-10-23
 
 ### Added
 - User registration functionality
@@ -68,7 +82,7 @@ All notable changes to this project will be documented in this file.
 - Modified auth.py to support user creation
 - Updated login page to include link to registration
 
-## [2.0.0] - 2024-11-01
+## [2.0.0] - 2024-10-23
 
 ### Added
 - Support for custom domain categorization rules
@@ -80,7 +94,7 @@ All notable changes to this project will be documented in this file.
 - Modified app.py to include routes for managing custom rules
 - Updated index.html to include a link to the custom rules page
 
-## [1.9.0] - 2024-10-31
+## [1.9.0] - 2024-10-23
 
 ### Added
 - Implemented automated testing with GitHub Actions
@@ -90,7 +104,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Updated TODO.md to reflect the implementation of automated testing
 
-## [1.8.0] - 2024-10-30
+## [1.8.0] - 2024-10-23
 
 ### Added
 - Implemented multi-factor authentication using TOTP
@@ -102,7 +116,7 @@ All notable changes to this project will be documented in this file.
 - Modified login process to support 2FA
 - Added new templates for 2FA authentication and setup
 
-## [1.7.0] - 2024-10-29
+## [1.7.0] - 2024-10-23
 
 ### Added
 - Email notifications for bulk import results
@@ -112,7 +126,7 @@ All notable changes to this project will be documented in this file.
 - Updated bulk_import function in app.py to send email notifications
 - Added Flask-Mail to requirements.txt
 
-## [1.6.0] - 2024-10-28
+## [1.6.0] - 2024-10-23
 
 ### Added
 - Implemented data visualization for domain statistics
@@ -123,7 +137,7 @@ All notable changes to this project will be documented in this file.
 - Updated app.py to include a new route for domain statistics
 - Modified index.html to include a link to the statistics page
 
-## [1.5.0] - 2024-10-27
+## [1.5.0] - 2024-10-23
 
 ### Added
 - Support for exporting domains to Excel format
@@ -134,7 +148,7 @@ All notable changes to this project will be documented in this file.
 - Modified index.html template to include Excel export option
 - Updated requirements.txt with openpyxl dependency
 
-## [1.4.0] - 2024-10-26
+## [1.4.0] - 2024-10-23
 
 ### Added
 - Improved documentation in README.md
@@ -146,7 +160,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Minor bug fixes and code improvements
 
-## [1.3.0] - 2024-10-25
+## [1.3.0] - 2024-10-23
 
 ### Added
 - Command-line interface (CLI) for the application
@@ -156,7 +170,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Updated requirements.txt to include Click library
 
-## [1.2.0] - 2024-10-24
+## [1.2.0] - 2024-10-23
 
 ### Added
 - Improved documentation in README.md

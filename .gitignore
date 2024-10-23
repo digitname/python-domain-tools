@@ -3,6 +3,7 @@
 venv
 .prompt
 domains.db
+.date
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

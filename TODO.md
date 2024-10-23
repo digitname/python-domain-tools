@@ -36,6 +36,7 @@
 - [x] Create a separate page for listing domains with filtering and pagination
 - [x] Implement consistent Bootstrap-based styling across all pages
 - [x] Implement dynamic filtering and searching for domain list
+- [x] Add actions to clean up domain list (remove NS servers, subdomains, selected domains)
 
 # Future Improvements
 - [ ] Add support for exporting to PDF format
@@ -47,3 +48,5 @@
 - [ ] Implement dark mode option
 - [ ] Optimize database queries for large datasets
 - [ ] Implement server-side caching for frequently accessed data
+- [ ] Add undo functionality for domain removal actions
+- [ ] Implement domain categorization based on machine learning

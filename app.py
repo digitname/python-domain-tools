@@ -377,6 +377,48 @@ def api_list_domains():
         'pagination': pagination.links
     })
 
+@app.route('/api/remove_ns', methods=['POST'])
+@login_required
+def remove_ns():
+    conn = sqlite3.connect('domains.db')
+    c = conn.cursor()
+    c.execute("DELETE FROM domains WHERE domain LIKE 'ns%'")
+    removed_count = c.rowcount
+    conn.commit()
+    conn.close()
+    return jsonify({'message': f'Removed {removed_count} NS server domains'})
+
+@app.route('/api/remove_subdomains', methods=['POST'])
+@login_required
+def remove_subdomains():
+    conn = sqlite3.connect('domains.db')
+    c = conn.cursor()
+    c.execute("SELECT domain FROM domains")
+    domains = [row[0] for row in c.fetchall()]
+    
+    removed_count = 0
+    for domain in domains:
+        parts = domain.split('.')
+        if len(parts) > 2:
+            c.execute("DELETE FROM domains WHERE domain = ?", (domain,))
+            removed_count += 1
+    
+    conn.commit()
+    conn.close()
+    return jsonify({'message': f'Removed {removed_count} subdomains'})
+
+@app.route('/api/remove_selected', methods=['POST'])
+@login_required
+def remove_selected():
+    domains = request.json.get('domains', [])
+    conn = sqlite3.connect('domains.db')
+    c = conn.cursor()
+    c.executemany("DELETE FROM domains WHERE domain = ?", [(domain,) for domain in domains])
+    removed_count = c.rowcount
+    conn.commit()
+    conn.close()
+    return jsonify({'message': f'Removed {removed_count} selected domains'})
+
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
