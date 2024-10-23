@@ -32,25 +32,21 @@ def validate_domain(domain):
 def categorize_domain(domain):
     extracted = tldextract.extract(domain)
     
-    # Check custom rules first
-    for rule, category in custom_rules.items():
-        if re.search(rule, domain):
-            return category
+    # List of known new gTLDs
+    new_gtlds = ['app', 'blog', 'shop', 'store', 'tech', 'dev', 'io', 'ai', 'co', 'startup', 'online']
     
-    # Default categorization
-    if extracted.suffix in ['com', 'org', 'net', 'edu', 'gov']:
-        return f'Common TLD (.{extracted.suffix})'
-    
-    if len(extracted.suffix) == 2:
-        return f'Country Code TLD (.{extracted.suffix})'
-    
-    if len(extracted.suffix) > 2:
-        return f'Generic TLD (.{extracted.suffix})'
-    
-    if extracted.subdomain:
-        return 'Subdomain'
-    
-    return 'Other'
+    if not extracted.suffix:
+        return "Invalid Domain"
+    elif extracted.subdomain:
+        return "Subdomain"
+    elif extracted.suffix in new_gtlds or len(extracted.suffix.split('.')) > 1:
+        return f"New gTLD (.{extracted.suffix})"
+    elif extracted.suffix == "com":
+        return "Common TLD (.com)"
+    elif extracted.suffix in ["org", "net", "edu", "gov"]:
+        return f"Common TLD (.{extracted.suffix})"
+    else:
+        return f"Other TLD (.{extracted.suffix})"
 
 def add_custom_rule(rule, category):
     custom_rules[rule] = category

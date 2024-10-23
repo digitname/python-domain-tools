@@ -8,8 +8,8 @@
     <h2>Extract Domains</h2>
     <form method="POST" action="{{ url_for('index') }}">
         <div class="form-group">
-            <label for="text">Enter text containing domains:</label>
-            <textarea class="form-control" id="text" name="text" rows="5" required></textarea>
+            <label for="text">Enter text containing domains (up to 10KB):</label>
+            <textarea class="form-control" id="text" name="text" rows="20" maxlength="10240" style="width: 100%;" required></textarea>
         </div>
         <button type="submit" class="btn btn-primary">Extract Domains</button>
     </form>

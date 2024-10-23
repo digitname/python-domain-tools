@@ -254,3 +254,27 @@ All notable changes to this project will be documented in this file.
 - Initial release of the Domain Extractor application
 - Basic domain extraction from plain text
 - Simple web interface for input and display of results
+
+## [Unreleased]
+
+### Added
+- Display of total domain count in the navigation menu
+- Context processor to inject total domain count into all templates
+- Sorting functionality for domain list (by domain name and category)
+- Extended DNS server removal to include popular providers like Cloudflare and Sedo
+- Hashtag functionality for domains
+  - New field 'hashtags' added to Domain model
+  - API endpoint for adding hashtags to selected domains
+  - UI elements in list_domains.html for adding hashtags
+
+### Changed
+- Updated `list_domains` function to include sorting options
+- Modified `list_domains.html` template to include sorting links and indicators
+- Updated `base.html` template to show domain count in the menu
+- Improved `remove_ns` function to remove a wider range of DNS server domains, including *.NS.CLOUDFLARE.COM
+- Updated JavaScript in `list_domains.html` to reflect changes in DNS server removal and hashtag functionality
+- Improved domain categorization to correctly identify new gTLDs like .startup
+
+### Fixed
+- Fixed `remove_selected` function to correctly return the count of removed domains
+- Corrected categorization of domains with new gTLDs (e.g., solo.startup is now recognized as a TLD)

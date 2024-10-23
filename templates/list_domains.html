@@ -5,9 +5,9 @@
 {% block content %}
     <h1>Domain List</h1>
 
-    <form method="GET" action="{{ url_for('list_domains') }}">
-        <input type="text" name="search" value="{{ search_query }}" placeholder="Search domains">
-        <select name="category">
+    <form id="filter-form" method="GET" action="{{ url_for('list_domains') }}">
+        <input type="text" id="search" name="search" value="{{ search_query }}" placeholder="Search domains">
+        <select id="category" name="category">
             <option value="">All Categories</option>
             {% for category in categories %}
             <option value="{{ category }}" {% if category == category_filter %}selected{% endif %}>{{ category }}</option>
@@ -19,96 +19,126 @@
     <table class="table">
         <thead>
             <tr>
-                <th>Domain</th>
-                <th>Category</th>
+                <th>
+                    <input type="checkbox" id="select-all">
+                </th>
+                <th>
+                    <a href="{{ url_for('list_domains', sort='name', order='asc' if sort_by != 'name' or sort_order == 'desc' else 'desc', search=search_query, category=category_filter) }}">
+                        Domain
+                        {% if sort_by == 'name' %}
+                            {% if sort_order == 'asc' %}▲{% else %}▼{% endif %}
+                        {% endif %}
+                    </a>
+                </th>
+                <th>
+                    <a href="{{ url_for('list_domains', sort='category', order='asc' if sort_by != 'category' or sort_order == 'desc' else 'desc', search=search_query, category=category_filter) }}">
+                        Category
+                        {% if sort_by == 'category' %}
+                            {% if sort_order == 'asc' %}▲{% else %}▼{% endif %}
+                        {% endif %}
+                    </a>
+                </th>
+                <th>Hashtags</th>
             </tr>
         </thead>
         <tbody>
             {% for domain in domains %}
             <tr>
+                <td>
+                    <input type="checkbox" class="domain-checkbox" data-domain="{{ domain.name }}">
+                </td>
                 <td>{{ domain.name }}</td>
                 <td>{{ domain.category }}</td>
+                <td>{{ domain.hashtags }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 
-    <nav aria-label="Page navigation">
-        <ul class="pagination">
-            {% if pagination.has_prev %}
-            <li class="page-item">
-                <a class="page-link" href="{{ url_for('list_domains', page=pagination.prev_num, search=search_query, category=category_filter) }}">Previous</a>
-            </li>
-            {% endif %}
-            {% for page in pagination.iter_pages() %}
-            {% if page %}
-                {% if page != pagination.page %}
-                <li class="page-item">
-                    <a class="page-link" href="{{ url_for('list_domains', page=page, search=search_query, category=category_filter) }}">{{ page }}</a>
-                </li>
-                {% else %}
-                <li class="page-item active">
-                    <span class="page-link">{{ page }}</span>
-                </li>
-                {% endif %}
-            {% else %}
-                <li class="page-item disabled">
-                    <span class="page-link">...</span>
-                </li>
-            {% endif %}
-            {% endfor %}
-            {% if pagination.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="{{ url_for('list_domains', page=pagination.next_num, search=search_query, category=category_filter) }}">Next</a>
-            </li>
-            {% endif %}
-        </ul>
-    </nav>
+    <div>
+        <button id="remove-ns" class="btn btn-warning">Remove DNS Servers</button>
+        <button id="remove-subdomains" class="btn btn-warning">Remove Subdomains</button>
+        <button id="remove-selected" class="btn btn-danger" disabled>Remove Selected</button>
+        <input type="text" id="hashtags-input" placeholder="Enter hashtags">
+        <button id="add-hashtags" class="btn btn-primary" disabled>Add Hashtags</button>
+    </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    function updateRemoveSelectedButton() {
+    function updateButtons() {
         const checkboxes = document.querySelectorAll('.domain-checkbox:checked');
-        document.getElementById('remove-selected').disabled = checkboxes.length === 0;
+        const removeSelectedButton = document.getElementById('remove-selected');
+        const addHashtagsButton = document.getElementById('add-hashtags');
+        const hasSelectedDomains = checkboxes.length > 0;
+        
+        removeSelectedButton.disabled = !hasSelectedDomains;
+        addHashtagsButton.disabled = !hasSelectedDomains;
     }
 
     document.getElementById('search').addEventListener('input', () => document.getElementById('filter-form').submit());
     document.getElementById('category').addEventListener('change', () => document.getElementById('filter-form').submit());
 
     document.getElementById('remove-ns').addEventListener('click', () => {
-        fetch('/api/remove_ns', { method: 'POST' })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-                updateDomains();
-            });
+        if (confirm('Are you sure you want to remove all DNS server domains? This action cannot be undone.')) {
+            fetch('/api/remove_ns', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    location.reload();
+                });
+        }
     });
 
     document.getElementById('remove-subdomains').addEventListener('click', () => {
-        fetch('/api/remove_subdomains', { method: 'POST' })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-                updateDomains();
-            });
+        if (confirm('Are you sure you want to remove all subdomains? This action cannot be undone.')) {
+            fetch('/api/remove_subdomains', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    location.reload();
+                });
+        }
     });
 
     document.getElementById('remove-selected').addEventListener('click', () => {
         const selectedDomains = Array.from(document.querySelectorAll('.domain-checkbox:checked'))
             .map(checkbox => checkbox.getAttribute('data-domain'));
-        fetch('/api/remove_selected', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ domains: selectedDomains }),
-        })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-                updateDomains();
-            });
+        if (selectedDomains.length > 0 && confirm('Are you sure you want to remove the selected domains? This action cannot be undone.')) {
+            fetch('/api/remove_selected', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ domains: selectedDomains }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    location.reload();
+                });
+        }
+    });
+
+    document.getElementById('add-hashtags').addEventListener('click', () => {
+        const selectedDomains = Array.from(document.querySelectorAll('.domain-checkbox:checked'))
+            .map(checkbox => checkbox.getAttribute('data-domain'));
+        const hashtags = document.getElementById('hashtags-input').value.trim();
+        
+        if (selectedDomains.length > 0 && hashtags) {
+            fetch('/api/add_hashtags', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ domains: selectedDomains, hashtags: hashtags }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    location.reload();
+                });
+        }
     });
 
     document.addEventListener('change', (e) => {
@@ -118,11 +148,11 @@
             });
         }
         if (e.target.classList.contains('domain-checkbox') || e.target.id === 'select-all') {
-            updateRemoveSelectedButton();
+            updateButtons();
         }
     });
 
-    // Initial load
-    updateDomains();
+    // Initial setup
+    updateButtons();
 </script>
 {% endblock %}

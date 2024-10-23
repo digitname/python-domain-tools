@@ -5,6 +5,7 @@ from flask_limiter.util import get_remote_address
 from flask_mail import Mail, Message
 from flask_caching import Cache
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import IntegrityError
 import sqlite3
 import csv
 import io
@@ -15,7 +16,6 @@ from auth import User, init_auth_db, add_user, login_manager
 import logging
 from collections import Counter
 from flask_paginate import Pagination
-
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'  # Change this to a secure random key
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///domains.db'
@@ -32,6 +32,7 @@ class Domain(db.Model):
     name = db.Column(db.String(255), unique=True, nullable=False)
     category = db.Column(db.String(50), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    hashtags = db.Column(db.String(255))  # New field for hashtags
 
     def __repr__(self):
         return f'<Domain {self.name}>'
@@ -70,11 +71,23 @@ def init_db():
     init_auth_db()
 
 def save_domains(domains):
+    new_domains = 0
     for domain in domains:
         if validate_domain(domain):
             category = categorize_domain(domain)
-            db.session.add(Domain(name=domain, category=category, user_id=current_user.id))
-    db.session.commit()
+            try:
+                new_domain = Domain(name=domain, category=category, user_id=current_user.id)
+                db.session.add(new_domain)
+                db.session.commit()
+                new_domains += 1
+            except IntegrityError:
+                db.session.rollback()  # Roll back the failed transaction
+                # Optionally, you can update the existing domain's category here
+                existing_domain = Domain.query.filter_by(name=domain).first()
+                if existing_domain:
+                    existing_domain.category = category
+                    db.session.commit()
+    return new_domains
 
 @app.route('/', methods=['GET', 'POST'])
 @login_required
@@ -82,8 +95,8 @@ def index():
     if request.method == 'POST':
         text = request.form['text']
         extracted_domains = extract_domains(text)
-        save_domains(extracted_domains)
-        flash(f'Successfully extracted and saved {len(extracted_domains)} domains.')
+        new_domains = save_domains(extracted_domains)
+        flash(f'Successfully extracted and saved {new_domains} new domains.')
         return redirect(url_for('index'))
 
     domains = Domain.query.filter_by(user_id=current_user.id).all()
@@ -117,7 +130,7 @@ def export():
             io.BytesIO(output.getvalue().encode('utf-8')),
             mimetype='text/csv',
             as_attachment=True,
-            attachment_filename='domains.csv'
+            download_name='domains.csv'
         )
     elif format == 'json':
         return jsonify([{'domain': domain.name, 'category': domain.category} for domain in domains])
@@ -134,7 +147,7 @@ def export():
             output,
             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             as_attachment=True,
-            attachment_filename='domains.xlsx'
+            download_name='domains.xlsx'
         )
 
 @app.route('/api/domains', methods=['GET'])
@@ -295,10 +308,10 @@ def register():
 @app.route('/domains', methods=['GET'])
 @login_required
 def list_domains():
-    page = request.args.get('page', 1, type=int)
-    per_page = 20  # Number of domains per page
     search_query = request.args.get('search', '')
     category_filter = request.args.get('category', '')
+    sort_by = request.args.get('sort', 'name')
+    sort_order = request.args.get('order', 'asc')
 
     query = Domain.query.filter_by(user_id=current_user.id)
     if search_query:
@@ -306,18 +319,25 @@ def list_domains():
     if category_filter:
         query = query.filter(Domain.category == category_filter)
 
-    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
-    domains = pagination.items
+    if sort_by == 'name':
+        query = query.order_by(Domain.name.asc() if sort_order == 'asc' else Domain.name.desc())
+    elif sort_by == 'category':
+        query = query.order_by(Domain.category.asc() if sort_order == 'asc' else Domain.category.desc())
+
+    domains = query.all()
+    total_domains = len(domains)
 
     categories = Domain.query.with_entities(Domain.category).distinct().all()
     categories = [category[0] for category in categories]
 
     return render_template('list_domains.html', 
                            domains=domains, 
-                           pagination=pagination,
                            search_query=search_query, 
                            category_filter=category_filter, 
-                           categories=categories)
+                           categories=categories,
+                           total_domains=total_domains,
+                           sort_by=sort_by,
+                           sort_order=sort_order)
 
 @app.route('/api/list_domains', methods=['GET'])
 @login_required
@@ -344,9 +364,31 @@ def api_list_domains():
 @app.route('/api/remove_ns', methods=['POST'])
 @login_required
 def remove_ns():
-    Domain.query.filter(Domain.name.like('ns%')).delete()
+    popular_ns = [
+        'ns%',  # Catches ns1, ns2, etc.
+        'dns%',  # Catches dns1, dns2, etc.
+        '%.cloudflare.com',
+        '%.NS.CLOUDFLARE.COM',
+        '%.sedo.com',
+        '%.registrar-servers.com',
+        '%.domaincontrol.com',
+        '%.googledomains.com',
+        '%.awsdns-%',
+        '%.azure-dns.%',
+        '%.gandi.net',
+        '%.ovh.net',
+        '%.name-services.com',
+    ]
+    
+    removed_count = 0
+    for pattern in popular_ns:
+        domains_to_remove = Domain.query.filter(Domain.name.ilike(pattern)).all()
+        for domain in domains_to_remove:
+            db.session.delete(domain)
+            removed_count += 1
+    
     db.session.commit()
-    return jsonify({'message': f'Removed {db.session.rowcount} NS server domains'})
+    return jsonify({'message': f'Removed {removed_count} DNS server domains'})
 
 @app.route('/api/remove_subdomains', methods=['POST'])
 @login_required
@@ -357,7 +399,7 @@ def remove_subdomains():
     for domain in domains:
         parts = domain.name.split('.')
         if len(parts) > 2:
-            Domain.query.filter(Domain.name == domain.name).delete()
+            db.session.delete(domain)
             removed_count += 1
     
     db.session.commit()
@@ -367,9 +409,31 @@ def remove_subdomains():
 @login_required
 def remove_selected():
     domains = request.json.get('domains', [])
-    Domain.query.filter(Domain.name.in_(domains)).delete()
+    removed_count = Domain.query.filter(Domain.name.in_(domains)).delete(synchronize_session='fetch')
     db.session.commit()
-    return jsonify({'message': f'Removed {db.session.rowcount} selected domains'})
+    return jsonify({'message': f'Removed {removed_count} selected domains'})
+
+@app.route('/api/add_hashtags', methods=['POST'])
+@login_required
+def add_hashtags():
+    data = request.json
+    domains = data.get('domains', [])
+    hashtags = data.get('hashtags', '')
+    
+    updated_count = Domain.query.filter(Domain.name.in_(domains)).update(
+        {Domain.hashtags: Domain.hashtags + ' ' + hashtags if Domain.hashtags else hashtags},
+        synchronize_session='fetch'
+    )
+    db.session.commit()
+    
+    return jsonify({'message': f'Added hashtags to {updated_count} domains'})
+
+@app.context_processor
+def inject_total_domains():
+    if current_user.is_authenticated:
+        total_domains = Domain.query.filter_by(user_id=current_user.id).count()
+        return dict(total_domains=total_domains)
+    return dict()
 
 if __name__ == '__main__':
     with app.app_context():
