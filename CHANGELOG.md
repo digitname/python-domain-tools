@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.0] - 2024-10-29
+
+### Added
+- Email notifications for bulk import results
+- Flask-Mail integration for sending emails
+
+### Changed
+- Updated bulk_import function in app.py to send email notifications
+- Added Flask-Mail to requirements.txt
+
 ## [1.6.0] - 2024-10-28
 
 ### Added

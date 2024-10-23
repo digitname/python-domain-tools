@@ -8,6 +8,7 @@ Flask-Limiter==2.4.0
 importlib-metadata==4.8.3
 click==8.0.3
 openpyxl==3.0.9
+Flask-Mail==0.9.1
 
 
 

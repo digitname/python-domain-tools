@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domain Statistics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Domain Statistics</h1>
+    <p>Total Domains: {{ total_domains }}</p>
+    <canvas id="categoryChart"></canvas>
+    <script>
+        var ctx = document.getElementById('categoryChart').getContext('2d');
+        var chart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: {{ category_stats.keys() | list | tojson }},
+                datasets: [{
+                    data: {{ category_stats.values() | list | tojson }},
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 206, 86, 0.8)',
+                        'rgba(75, 192, 192, 0.8)',
+                        'rgba(153, 102, 255, 0.8)',
+                    ],
+                }]
+            },
+            options: {
+                responsive: true,
+                title: {
+                    display: true,
+                    text: 'Domain Categories'
+                }
+            }
+        });
+    </script>
+    <br>
+    <a href="{{ url_for('index') }}">Back to main page</a>
+</body>
+</html>

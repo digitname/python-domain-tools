@@ -7,12 +7,13 @@ A web application and command-line tool for extracting, validating, and categori
 - Extract domains from plain text, HTML, and Markdown inputs
 - Validate and categorize extracted domains
 - User authentication and authorization with admin roles
-- Bulk import of domains from CSV files
+- Bulk import of domains from CSV files with email notifications
 - Search functionality for stored domains
-- Export domains in CSV and JSON formats
+- Export domains in CSV, JSON, and Excel formats
 - RESTful API for programmatic access with rate limiting
 - Responsive web interface
 - Command-line interface (CLI) for quick domain operations
+- Data visualization for domain statistics
 
 ## Installation
 

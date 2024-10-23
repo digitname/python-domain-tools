@@ -25,9 +25,9 @@
 - [x] Create a command-line interface (CLI) for the application
 - [x] Add support for exporting to Excel format
 - [x] Implement data visualization for domain statistics
+- [x] Add email notifications for bulk import results
 
 # Future Improvements
-- [ ] Add email notifications for bulk import results
 - [ ] Implement multi-factor authentication
 - [ ] Implement automated testing with GitHub Actions
 - [ ] Add support for custom domain categorization rules

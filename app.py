@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, send_file, jsonify, redirect,
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_mail import Mail, Message
 import sqlite3
 import csv
 import io
@@ -14,6 +15,16 @@ from collections import Counter
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'  # Change this to a secure random key
 login_manager.init_app(app)
+
+# Email configuration
+app.config['MAIL_SERVER'] = 'smtp.example.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'your_email@example.com'
+app.config['MAIL_PASSWORD'] = 'your_email_password'
+app.config['MAIL_DEFAULT_SENDER'] = 'your_email@example.com'
+
+mail = Mail(app)
 
 limiter = Limiter(app, key_func=get_remote_address)
 
@@ -140,6 +151,13 @@ def bulk_import():
                 domains = [row[0] for row in csv_reader if row]
                 save_domains(domains)
                 flash(f'Successfully imported {len(domains)} domains')
+                
+                # Send email notification
+                msg = Message("Bulk Import Results",
+                              recipients=[current_user.email])
+                msg.body = f"Your bulk import has been completed. {len(domains)} domains were successfully imported."
+                mail.send(msg)
+                
             except Exception as e:
                 logging.error(f'Error during bulk import: {str(e)}')
                 flash('Error during import. Please check the file format.')
