@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Categorization Rules</title>
+</head>
+<body>
+    <h1>Custom Categorization Rules</h1>
+    <form method="POST">
+        <input type="text" name="rule" placeholder="Regular expression" required>
+        <input type="text" name="category" placeholder="Category" required>
+        <input type="submit" value="Add Rule">
+    </form>
+    <h2>Existing Rules</h2>
+    <ul>
+    {% for rule, category in rules.items() %}
+        <li>{{ rule }} -> {{ category }} <a href="{{ url_for('remove_rule', rule=rule) }}">Remove</a></li>
+    {% endfor %}
+    </ul>
+    <a href="{{ url_for('index') }}">Back to main page</a>
+</body>
+</html>

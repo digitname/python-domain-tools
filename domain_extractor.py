@@ -2,6 +2,16 @@ import re
 from bs4 import BeautifulSoup
 import markdown
 import tldextract
+import json
+
+def load_custom_rules():
+    try:
+        with open('custom_rules.json', 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {}
+
+custom_rules = load_custom_rules()
 
 def extract_domains(text, file_type='text'):
     if file_type == 'html':
@@ -22,20 +32,35 @@ def validate_domain(domain):
 def categorize_domain(domain):
     extracted = tldextract.extract(domain)
     
-    # Check for common TLDs
+    # Check custom rules first
+    for rule, category in custom_rules.items():
+        if re.search(rule, domain):
+            return category
+    
+    # Default categorization
     if extracted.suffix in ['com', 'org', 'net', 'edu', 'gov']:
         return f'Common TLD (.{extracted.suffix})'
     
-    # Check for country code TLDs
     if len(extracted.suffix) == 2:
         return f'Country Code TLD (.{extracted.suffix})'
     
-    # Check for generic TLDs
     if len(extracted.suffix) > 2:
         return f'Generic TLD (.{extracted.suffix})'
     
-    # Check for subdomains
     if extracted.subdomain:
         return 'Subdomain'
     
     return 'Other'
+
+def add_custom_rule(rule, category):
+    custom_rules[rule] = category
+    with open('custom_rules.json', 'w') as f:
+        json.dump(custom_rules, f)
+
+def remove_custom_rule(rule):
+    if rule in custom_rules:
+        del custom_rules[rule]
+        with open('custom_rules.json', 'w') as f:
+            json.dump(custom_rules, f)
+        return True
+    return False

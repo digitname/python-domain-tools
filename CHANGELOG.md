@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.0] - 2024-11-01
+
+### Added
+- Support for custom domain categorization rules
+- New page for managing custom rules
+- JSON file storage for custom rules
+
+### Changed
+- Updated domain_extractor.py to use custom rules in categorization
+- Modified app.py to include routes for managing custom rules
+- Updated index.html to include a link to the custom rules page
+
 ## [1.9.0] - 2024-10-31
 
 ### Added

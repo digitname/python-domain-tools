@@ -8,7 +8,7 @@ import csv
 import io
 import openpyxl
 import pyotp
-from domain_extractor import extract_domains, validate_domain, categorize_domain
+from domain_extractor import extract_domains, validate_domain, categorize_domain, add_custom_rule, remove_custom_rule, custom_rules
 from auth import User, init_auth_db, add_user, login_manager
 import logging
 from collections import Counter
@@ -229,6 +229,25 @@ def statistics():
     conn.close()
     
     return render_template('statistics.html', category_stats=category_stats, total_domains=total_domains)
+
+@app.route('/custom_rules', methods=['GET', 'POST'])
+@login_required
+def custom_rules():
+    if request.method == 'POST':
+        rule = request.form['rule']
+        category = request.form['category']
+        add_custom_rule(rule, category)
+        flash('Custom rule added successfully')
+    return render_template('custom_rules.html', rules=custom_rules)
+
+@app.route('/remove_rule/<rule>')
+@login_required
+def remove_rule(rule):
+    if remove_custom_rule(rule):
+        flash('Custom rule removed successfully')
+    else:
+        flash('Rule not found')
+    return redirect(url_for('custom_rules'))
 
 if __name__ == '__main__':
     init_db()
