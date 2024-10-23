@@ -6,6 +6,7 @@ from flask_mail import Mail
 from flask_caching import Cache
 from flask_migrate import Migrate
 import logging
+import socket
 
 from models import db, User, Domain
 from domain_utils import extract_domains, validate_domain, categorize_domain, add_custom_rule, remove_custom_rule, load_custom_rules
@@ -14,8 +15,17 @@ import app_routes
 # from api import register_api_routes
 from auth import login_manager, load_user
 
+def find_free_port():
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind(('localhost', 0))
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    port = s.getsockname()[1]
+    print(port)
+    s.close()
+    return port
+
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, template_folder='../templates')
     app.secret_key = 'your_secret_key_here'  # Change this to a secure random key
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///domains.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -52,4 +62,5 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True)
+    port = find_free_port()
+    app.run(debug=True, port=port)

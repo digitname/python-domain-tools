@@ -15,7 +15,8 @@ from datetime import datetime
 from models import db, User, Domain
 from domain_utils import extract_domains, validate_domain, categorize_domain, add_custom_rule, remove_custom_rule, load_custom_rules
 
-def save_domains(domains, current_user):
+
+def save_domains(domains):
     new_domains = 0
     for domain in domains:
         if validate_domain(domain):
@@ -26,7 +27,8 @@ def save_domains(domains, current_user):
                 db.session.commit()
                 new_domains += 1
             except IntegrityError:
-                db.session.rollback()
+                db.session.rollback()  # Roll back the failed transaction
+                # Optionally, you can update the existing domain's category here
                 existing_domain = Domain.query.filter_by(name=domain).first()
                 if existing_domain:
                     existing_domain.category = category
@@ -38,10 +40,13 @@ def register_routes(app, mail, cache, limiter):
     @login_required
     def index():
         if request.method == 'POST':
-            text = request.form['text']
-            extracted_domains = extract_domains(text)
-            new_domains = save_domains(extracted_domains, current_user)
-            flash(f'Successfully extracted and saved {new_domains} new domains.')
+            text = request.form.get('text', None)
+            if text:
+                extracted_domains = extract_domains(text)
+                new_domains = save_domains(extracted_domains, current_user)
+                flash(f'Successfully extracted and saved {new_domains} new domains.')
+            else:
+                flash('Please enter some text to extract domains.')
             return redirect(url_for('index'))
 
         domains = Domain.query.filter_by(user_id=current_user.id).all()
@@ -170,12 +175,13 @@ def register_routes(app, mail, cache, limiter):
                     domains = [row[0] for row in csv_reader if row]
                     save_domains(domains, current_user)
                     flash(f'Successfully imported {len(domains)} domains')
-                    
+
+                    # Send email notification
                     msg = Message("Bulk Import Results",
-                                recipients=[current_user.email])
+                                  recipients=[current_user.email])
                     msg.body = f"Your bulk import has been completed. {len(domains)} domains were successfully imported."
                     mail.send(msg)
-                    
+
                 except Exception as e:
                     logging.error(f'Error during bulk import: {str(e)}')
                     flash('Error during import. Please check the file format.')
