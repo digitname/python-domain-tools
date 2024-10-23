@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.2.2] - 2024-11-05
+
+### Fixed
+- Resolved issue with custom rules not being properly loaded in the template
+
 ## [2.2.1] - 2024-11-04
 
 ### Added

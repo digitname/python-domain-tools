@@ -3,6 +3,9 @@
 # remove old environment
 #source venv/bin/deactivate
 rm -rf venv
+rm app.log
+rm domains.db
+
 chmod +x *.sh
 
 # Create virtual environment
@@ -21,7 +24,6 @@ pip uninstall -y -r requirements.txt
 pip install -r requirements.txt
 
 # Run database migration
-rm domains.db
 python migrate_db.py
 
 # Initialize the database

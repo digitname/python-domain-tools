@@ -32,6 +32,7 @@
 - [x] Implement user registration functionality
 - [x] Implement a caching mechanism to improve performance
 - [x] Add database migration for email column
+- [x] Fix custom rules loading in template
 
 # Future Improvements
 - [ ] Add support for exporting to PDF format

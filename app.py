@@ -9,7 +9,7 @@ import csv
 import io
 import openpyxl
 import pyotp
-from domain_extractor import extract_domains, validate_domain, categorize_domain, add_custom_rule, remove_custom_rule, custom_rules
+from domain_extractor import extract_domains, validate_domain, categorize_domain, add_custom_rule, remove_custom_rule, custom_rules, load_custom_rules
 from auth import User, init_auth_db, add_user, login_manager
 import logging
 from collections import Counter
@@ -246,7 +246,9 @@ def custom_rules():
         category = request.form['category']
         add_custom_rule(rule, category)
         flash('Custom rule added successfully')
-    return render_template('custom_rules.html', rules=custom_rules)
+    
+    rules = load_custom_rules()  # Load the custom rules from the JSON file
+    return render_template('custom_rules.html', rules=rules)
 
 @app.route('/remove_rule/<rule>')
 @login_required
