@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2.13.0] - 2024-11-01
+## [2.13.0] - 2024-10-23
 
 ### Added
 - Implemented additional domain categorization rules to handle new gTLDs.
@@ -14,7 +14,7 @@ All notable changes to this project will be documented in this file.
 - Fixed the 'remove_selected' function to correctly return the count of removed domains.
 - Corrected the categorization of domains with new gTLDs (e.g., solo.startup is now recognized as a TLD).
 
-## [2.12.0] - 2024-10-30
+## [2.12.0] - 2024-10-23
 
 ### Added
 - Created separate `models.py` file for database models
@@ -28,7 +28,7 @@ All notable changes to this project will be documented in this file.
 - Resolved circular import issue between `app.py` and `auth.py`
 - Fixed missing `users` table issue by properly initializing the database
 
-## [2.11.0] - 2024-10-29
+## [2.11.0] - 2024-10-23
 
 ### Added
 - Integrated Flask-Migrate for database migrations
@@ -42,7 +42,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Resolved issue with missing 'users' table by creating proper database schema
 
-## [2.10.0] - 2024-10-28
+## [2.10.0] - 2024-10-23
 
 ### Added
 - New `hashtags` field for Domain model
@@ -56,7 +56,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Resolved issue with missing `hashtags` column in domain table
 
-## [2.9.0] - 2024-10-27
+## [2.9.0] - 2024-10-23
 
 ### Added
 - Display of total domain count in the navigation menu
@@ -82,7 +82,7 @@ All notable changes to this project will be documented in this file.
 - Fixed `remove_selected` function to correctly return the count of removed domains
 - Corrected categorization of domains with new gTLDs (e.g., solo.startup is now recognized as a TLD)
 
-## [2.8.0] - 2024-10-26
+## [2.8.0] - 2024-10-23
 
 ### Added
 - Sorting functionality for domain list (by domain name and category)
@@ -92,7 +92,7 @@ All notable changes to this project will be documented in this file.
 - Updated list_domains route in app.py to support sorting
 - Modified list_domains.html template to include sorting links and indicators
 
-## [2.7.0] - 2024-10-25
+## [2.7.0] - 2024-10-23
 
 ### Added
 - Real-time statistics update after each domain extraction
@@ -102,7 +102,7 @@ All notable changes to this project will be documented in this file.
 - Removed pagination from the domain list page
 - Updated domain list filtering to use form submission instead of dynamic updates
 
-## [2.6.0] - 2024-10-24
+## [2.6.0] - 2024-10-23
 
 ### Added
 - New actions to clean up domain list:
