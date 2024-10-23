@@ -12,8 +12,8 @@ from collections import Counter
 from flask_paginate import Pagination
 from datetime import datetime
 
-from .models import db, User, Domain
-from .domain_utils import extract_domains, validate_domain, categorize_domain, add_custom_rule, remove_custom_rule, load_custom_rules
+from models import db, User, Domain
+from domain_utils import extract_domains, validate_domain, categorize_domain, add_custom_rule, remove_custom_rule, load_custom_rules
 
 def register_api_routes(app, mail, cache, limiter):
 

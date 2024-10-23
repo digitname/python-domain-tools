@@ -7,10 +7,11 @@ from flask_caching import Cache
 from flask_migrate import Migrate
 import logging
 
-from .models import db
-from .routes import register_routes
-from .api import register_api_routes
-from .auth import login_manager
+from models import db, User, Domain
+from domain_utils import extract_domains, validate_domain, categorize_domain, add_custom_rule, remove_custom_rule, load_custom_rules
+from routes import register_routes
+from api import register_api_routes
+from auth import login_manager
 
 def create_app():
     app = Flask(__name__)
@@ -28,7 +29,7 @@ def create_app():
 
     # Initialize extensions
     db.init_app(app)
-    login_manager.init_app(app)
+    login_manager.init_app(app)  # Initialize the login_manager with the app
     migrate = Migrate(app, db)
     mail = Mail(app)
     cache = Cache(app, config={'CACHE_TYPE': 'simple'})

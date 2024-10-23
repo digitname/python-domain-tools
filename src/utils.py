@@ -1,7 +1,7 @@
 import openpyxl
 import csv
 import io
-from .models import Domain
+from models import Domain
 
 def generate_excel(domains):
     workbook = openpyxl.Workbook()

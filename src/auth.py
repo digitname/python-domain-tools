@@ -1,77 +1,17 @@
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
-from werkzeug.security import generate_password_hash, check_password_hash
-from models import User, db
+from flask_login import LoginManager, login_user
+from werkzeug.security import check_password_hash
+from models import User
 
 login_manager = LoginManager()
 
-class User(UserMixin):
-    def __init__(self, id, username, password, is_admin=False, two_factor_secret=None, email=None):
-        self.id = id
-        self.username = username
-        self.password = password
-        self.is_admin = is_admin
-        self.two_factor_secret = two_factor_secret
-        self.email = email
-
-    @staticmethod
-    def get(user_id):
-        conn = sqlite3.connect('domains.db')
-        c = conn.cursor()
-        c.execute("SELECT * FROM users WHERE id = ?", (user_id,))
-        user = c.fetchone()
-        conn.close()
-        if user:
-            return User(user[0], user[1], user[2], user[3], user[4], user[5])
-        return None
-
-    @staticmethod
-    def get_by_username(username):
-        conn = sqlite3.connect('domains.db')
-        c = conn.cursor()
-        c.execute("SELECT * FROM users WHERE username = ?", (username,))
-        user = c.fetchone()
-        conn.close()
-        if user:
-            return User(user[0], user[1], user[2], user[3], user[4], user[5])
-        return None
-
-    def check_password(self, password):
-        return check_password_hash(self.password, password)
-
-    def set_two_factor_secret(self, secret):
-        conn = sqlite3.connect('domains.db')
-        c = conn.cursor()
-        c.execute("UPDATE users SET two_factor_secret = ? WHERE id = ?", (secret, self.id))
-        conn.commit()
-        conn.close()
-        self.two_factor_secret = secret
-
-    @staticmethod
-    def create(username, password, email):
-        conn = sqlite3.connect('domains.db')
-        c = conn.cursor()
-        try:
-            c.execute("INSERT INTO users (username, password, email) VALUES (?, ?, ?)",
-                      (username, generate_password_hash(password), email))
-            conn.commit()
-            user_id = c.lastrowid
-            conn.close()
-            return User(user_id, username, generate_password_hash(password), False, None, email)
-        except sqlite3.IntegrityError:
-            conn.close()
-            return None
-
-def init_auth_db():
-    # This function is no longer needed with SQLAlchemy
-    pass
-
-def add_user(username, password, email, is_admin=False):
-    new_user = User(username=username, email=email, is_admin=is_admin)
-    new_user.set_password(password)
-    db.session.add(new_user)
-    db.session.commit()
-    return new_user
-
-@login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+def login_user_func(username, password):
+    user = User.query.filter_by(username=username).first()
+    if user and check_password_hash(user.password, password):
+        login_user(user)
+        return True
+    return False
+
+__all__ = ['login_manager', 'load_user', 'login_user_func']
