@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2024-10-25
+
+### Added
+- Command-line interface (CLI) for the application
+- New CLI commands: extract, validate, and list_domains
+- Click library for building the CLI
+
+### Changed
+- Updated requirements.txt to include Click library
+
 ## [1.2.0] - 2024-10-24
 
 ### Added

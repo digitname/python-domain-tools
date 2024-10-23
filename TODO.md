@@ -22,13 +22,13 @@
 - [x] Add user roles and permissions
 - [x] Implement rate limiting for API access
 - [x] Create git_update.sh script for version management
+- [x] Create a command-line interface (CLI) for the application
 
 # Future Improvements
 - [ ] Add support for exporting to more file formats (e.g., Excel, PDF)
 - [ ] Implement data visualization for domain statistics
 - [ ] Add email notifications for bulk import results
 - [ ] Implement multi-factor authentication
-- [ ] Create a command-line interface (CLI) for the application
 - [ ] Implement automated testing with GitHub Actions
 - [ ] Add support for custom domain categorization rules
 - [ ] Implement a caching mechanism to improve performance
