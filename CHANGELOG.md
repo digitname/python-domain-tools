@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.2.0] - 2024-11-03
+
+### Added
+- Implemented caching mechanism using Flask-Caching
+- Added caching to search, export, API, and statistics routes
+
+### Changed
+- Updated app.py to include caching configuration and decorators
+- Added Flask-Caching to requirements.txt
+
 ## [2.1.0] - 2024-11-02
 
 ### Added

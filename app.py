@@ -3,6 +3,7 @@ from flask_login import LoginManager, login_required, login_user, logout_user, c
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_mail import Mail, Message
+from flask_caching import Cache
 import sqlite3
 import csv
 import io
@@ -16,6 +17,9 @@ from collections import Counter
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'  # Change this to a secure random key
 login_manager.init_app(app)
+
+# Cache configuration
+cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 # Email configuration
 app.config['MAIL_SERVER'] = 'smtp.example.com'
@@ -63,6 +67,7 @@ def index():
 
 @app.route('/search', methods=['GET'])
 @login_required
+@cache.cached(timeout=300, query_string=True)
 def search():
     query = request.args.get('query', '')
     conn = sqlite3.connect('domains.db')
@@ -74,6 +79,7 @@ def search():
 
 @app.route('/export', methods=['GET'])
 @login_required
+@cache.cached(timeout=300, query_string=True)
 def export():
     format = request.args.get('format', 'csv')
     conn = sqlite3.connect('domains.db')
@@ -114,6 +120,7 @@ def export():
 @app.route('/api/domains', methods=['GET'])
 @login_required
 @limiter.limit("100 per day")
+@cache.cached(timeout=300)
 def api_domains():
     conn = sqlite3.connect('domains.db')
     c = conn.cursor()
@@ -219,6 +226,7 @@ def admin():
 
 @app.route('/statistics')
 @login_required
+@cache.cached(timeout=300)
 def statistics():
     conn = sqlite3.connect('domains.db')
     c = conn.cursor()

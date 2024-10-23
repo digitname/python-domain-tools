@@ -30,9 +30,9 @@
 - [x] Implement automated testing with GitHub Actions
 - [x] Add support for custom domain categorization rules
 - [x] Implement user registration functionality
+- [x] Implement a caching mechanism to improve performance
 
 # Future Improvements
-- [ ] Implement a caching mechanism to improve performance
 - [ ] Add support for exporting to PDF format
 - [ ] Implement real-time domain analysis using websockets
 - [ ] Add password reset functionality
