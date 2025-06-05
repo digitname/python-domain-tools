@@ -1,4 +1,5 @@
 .idea
+.db
 .env
 venv
 .prompt
